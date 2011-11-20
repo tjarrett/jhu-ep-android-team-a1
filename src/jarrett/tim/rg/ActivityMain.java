@@ -5,6 +5,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -43,7 +46,13 @@ import android.widget.TextView;
  */
 public class ActivityMain extends Activity
 {
-    /**
+    private static final String TIM_SERVER = "Tim-Server";
+
+	private static final String TIM_CLIENT = "Tim-Client";
+
+	private static final String QR_SCANNER = "QR-Scanner";
+
+	/**
      * The list of ThingViews mapped by the values in the spinner
      */
     private Map<String, ThingView> thingView = new HashMap<String, ThingView>();
@@ -77,16 +86,16 @@ public class ActivityMain extends Activity
                 case BluetoothServer.BLUETOOTH_MESSAGE:
                     byte[] buffer = (byte[])msg.obj;
                     String content = new String(buffer, 0, msg.arg1);
-                    Log.d("Tim-Server", "Received " + content);
+                    Log.d(TIM_SERVER, "Received " + content);
                     
                     //Message is a server response...
                     if ( content.indexOf("[") != -1 ) {
                         //I can ignore this as the client
-                        Log.d("Tim-Client", "Server responded with: " + content);
+                        Log.d(TIM_CLIENT, "Server responded with: " + content);
                         
                     } else {
                         //I'm the server so I need to keep going
-                        Log.d("Tim-Server", "Got " + content + " from client");
+                        Log.d(TIM_SERVER, "Got " + content + " from client");
                         applyEventToCurrentThing(content);
                         
                     }
@@ -135,7 +144,7 @@ public class ActivityMain extends Activity
 
                             String message = generateMessage(view);
                             if ( message != null ) {
-                                Log.d("Tim-Server", "Thing fired off this: " + message);
+                                Log.d(TIM_SERVER, "Thing fired off this: " + message);
                                 bts.send(message);
                                 
                             }
@@ -431,6 +440,13 @@ public class ActivityMain extends Activity
             case R.id.bluetooth_settings:
                 startActivityForResult(new Intent(this, ActivityBluetooth.class), BluetoothServer.SELECTING_DEVICE);
                 return true;
+            case R.id.qr_scanning:
+            	Log.d(QR_SCANNER, "Initiating QR Scan");
+            	IntentIntegrator integrator = new IntentIntegrator(this);
+            	integrator.initiateScan();
+
+            	Log.d(QR_SCANNER, " --------------- Got thing:  " + integrator.getMessage());
+            	
         }
         return super.onMenuItemSelected(featureId, item);
     }
@@ -461,6 +477,13 @@ public class ActivityMain extends Activity
                 // ((TextView)findViewById(R.id.selected_device)).setText("NO DEVICE SELECTED");
             }
         }
+
+		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+		if (scanResult != null) {
+			// handle scan result
+		}
+		// else continue with any other code you need in the method
+        
         super.onActivityResult(requestCode, resultCode, data);
     }
 
