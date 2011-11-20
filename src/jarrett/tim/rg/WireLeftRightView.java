@@ -1,6 +1,5 @@
 package jarrett.tim.rg;
 
-import jarrett.tim.rg.CleatView.State;
 import android.content.Context;
 
 /**

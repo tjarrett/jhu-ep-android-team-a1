@@ -1,6 +1,5 @@
 package jarrett.tim.rg;
 
-import jarrett.tim.rg.ClapperView.State;
 import android.content.Context;
 
 /**

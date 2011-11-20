@@ -1,6 +1,5 @@
 package jarrett.tim.rg;
 
-import jarrett.tim.rg.WireView.State;
 import android.content.Context;
 
 /**

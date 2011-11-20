@@ -1,6 +1,5 @@
 package jarrett.tim.rg;
 
-import jarrett.tim.rg.RopeView.State;
 import android.content.Context;
 
 /**
