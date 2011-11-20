@@ -470,6 +470,13 @@ public class ActivityMain extends Activity
 				// DEMONSTRATION IN CLASS - DO NOT REALLY DO THIS
 			} else {
 				showDialog(BluetoothServer.DIALOG_USER_IS_EVIL);
+				try {
+                    finalize(); //bluetooth not enabled...
+                    
+                } catch ( Throwable e ) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 			}
 			break;
 		case BluetoothServer.SELECTING_DEVICE:
