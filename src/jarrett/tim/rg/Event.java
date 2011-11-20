@@ -18,6 +18,7 @@ public enum Event
     Steam, 
     Pull, 
     Release, 
-    Reset;
+    Reset,
+    Register;
 
 }//end Event

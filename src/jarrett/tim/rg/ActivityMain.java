@@ -227,6 +227,9 @@ public class ActivityMain extends Activity
                 public void onClick(View btnClicked)
                 {
                     String text = ((Button)(btnClicked)).getText().toString();
+                    
+                    String event = "0,1|" + text;
+                    
 
                     String direction = "ALL";
 
@@ -236,12 +239,16 @@ public class ActivityMain extends Activity
                     } else if ( "Water".equals(text) ) {
                         direction = "DOWN";
 
-                    } else if ( "Reset".equals(text) ) {
-                        // Keep the event local
-
+                    } else if ( "Reset".equals(text) || "Register".equals(text) ) {
+                        direction = null;
+                        
                     }
 
-                    String event = "0,1|" + text + "|" + direction;
+                    //Append direction if it makes sense
+                    if ( direction != null ) {
+                        event += "|" + direction;
+                    }
+                   
                     bts.send(event);
 
                 }// end onClick
