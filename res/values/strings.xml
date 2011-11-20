@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tim Jarrett\'s Rube Goldberg</string>
+    <string name="Heat">Heat</string>
+    <string name="Water">Water</string>
+    <string name="Pulse">Pulse</string>
+    <string name="ElectricOn">ElectricOn</string>    
+    <string name="ElectricOff">ElectricOff</string>
+    <string name="Steam">Steam</string>
+    <string name="Alex">Alex</string>
+    
+    <string-array name="gadgets_array">
+        <item>Monkey</item>
+        <item>Christmas Tree</item>
+        <item>Pinwheel</item>
+        <item>Candle</item>
+        <item>Clapper</item>
+        <item>Cleat</item>
+        <item>Electric Outlet</item>
+        <item>Kettle</item>
+        <item>Rope Down Right</item>
+        <item>Rope Left Right</item>
+        <item>Rope Up Down</item>
+        <item>Rope Up Right</item>
+        <item>Rubber Band</item>
+        <item>TV</item>
+        <item>Water Cooler</item>
+        <item>Wire Left Right</item>
+        <item>Wire Up Down</item>
+    </string-array>
+    <string name="gadget_spinner_prompt">Select Gadget</string>
+    
+    <string name="bluetooth_server">Bluetooth Server</string>
+    <string name="bluetooth_make_discoverable">Make Server Discoverable</string>
+    <string name="bluetooth_discoverable_button_text">Start Discovery Mode</string>
+    <string name="bluetooth_connect_to_server">Show list of bluetooth devices</string>
+    <string name="bluetooth_connect_to_server_button_text">Start Discovering Devices</string>
+</resources>
