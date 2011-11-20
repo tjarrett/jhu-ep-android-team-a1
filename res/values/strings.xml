@@ -35,4 +35,6 @@
     <string name="bluetooth_discoverable_button_text">Start Discovery Mode</string>
     <string name="bluetooth_connect_to_server">Show list of bluetooth devices</string>
     <string name="bluetooth_connect_to_server_button_text">Start Discovering Devices</string>
+    <string name="bluetooth_settings">Bluetooth Settings</string>
+    <string name="qr_scan">QR Scan</string>
 </resources>
