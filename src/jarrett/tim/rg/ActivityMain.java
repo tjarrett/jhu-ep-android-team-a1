@@ -475,26 +475,16 @@ public class ActivityMain extends Activity
 				// ((TextView)findViewById(R.id.selected_device)).setText("NO DEVICE SELECTED");
 			}
 			break;
-		}
-    	
-        // update our status for "enable bluetooth" requests
-        if ( requestCode == BluetoothServer.BLUETOOTH_ENABLED ) {
-            
-        }
-
-        // update selected device from our pairing activity
-        if ( requestCode == BluetoothServer.SELECTING_DEVICE ) {
-           
-        }
-
-		if (requestCode == IntentIntegrator.REQUEST_CODE) {
+		case IntentIntegrator.REQUEST_CODE:
 			IntentResult scanResult = IntentIntegrator.parseActivityResult(
 					requestCode, resultCode, data);
 			if (scanResult != null) {
-				// handle scan result
+				Log.d(QR_SCANNER, "------------Got the scan result: " + scanResult.getContents());
 			}
+			break;
+		default:
+			Log.e("Tim", "unknown activity request code: " + requestCode);
 		}
-		
         super.onActivityResult(requestCode, resultCode, data);
     }
 
