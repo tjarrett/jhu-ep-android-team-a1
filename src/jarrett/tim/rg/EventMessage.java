@@ -22,6 +22,11 @@ public class EventMessage
             
         }
         
+        if ( evt.toLowerCase().indexOf("register") != -1 ) {
+            event = Event.Register;
+            return;
+        }
+        
         throw new RuntimeException("Kaboom!");
         
     }
