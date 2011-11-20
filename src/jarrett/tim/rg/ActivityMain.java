@@ -455,35 +455,46 @@ public class ActivityMain extends Activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+		switch (requestCode) {
+		case BluetoothServer.BLUETOOTH_ENABLED:
+			if (resultCode == RESULT_OK) {
+				// onBluetoothEnabled(); // CONTINUE INITIALIZATION
+				// showDialog(DIALOG_BLUETOOTH_ENABLED); // ONLY USED FOR
+				// DEMONSTRATION IN CLASS - DO NOT REALLY DO THIS
+			} else {
+				showDialog(BluetoothServer.DIALOG_USER_IS_EVIL);
+			}
+			break;
+		case BluetoothServer.SELECTING_DEVICE:
+			if (resultCode == RESULT_OK) {
+				selectedDevice = data.getParcelableExtra("device");
+				Log.d("Tim", "Got the device...");
+				// bts.sendMessageToServer("Go go gadget arms");
+				// ((TextView)findViewById(R.id.selected_device)).setText(selectedDevice.getName());
+			} else {
+				// ((TextView)findViewById(R.id.selected_device)).setText("NO DEVICE SELECTED");
+			}
+			break;
+		}
+    	
         // update our status for "enable bluetooth" requests
         if ( requestCode == BluetoothServer.BLUETOOTH_ENABLED ) {
-            if ( resultCode == RESULT_OK ) {
-                //onBluetoothEnabled(); // CONTINUE INITIALIZATION
-                // showDialog(DIALOG_BLUETOOTH_ENABLED); // ONLY USED FOR
-                // DEMONSTRATION IN CLASS - DO NOT REALLY DO THIS
-            } else {
-                showDialog(BluetoothServer.DIALOG_USER_IS_EVIL);
-            }
+            
         }
 
         // update selected device from our pairing activity
         if ( requestCode == BluetoothServer.SELECTING_DEVICE ) {
-            if ( resultCode == RESULT_OK ) {
-                selectedDevice = data.getParcelableExtra("device");
-                Log.d("Tim", "Got the device...");
-                //bts.sendMessageToServer("Go go gadget arms");
-                // ((TextView)findViewById(R.id.selected_device)).setText(selectedDevice.getName());
-            } else {
-                // ((TextView)findViewById(R.id.selected_device)).setText("NO DEVICE SELECTED");
-            }
+           
         }
 
-		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-		if (scanResult != null) {
-			// handle scan result
+		if (requestCode == IntentIntegrator.REQUEST_CODE) {
+			IntentResult scanResult = IntentIntegrator.parseActivityResult(
+					requestCode, resultCode, data);
+			if (scanResult != null) {
+				// handle scan result
+			}
 		}
-		// else continue with any other code you need in the method
-        
+		
         super.onActivityResult(requestCode, resultCode, data);
     }
 
