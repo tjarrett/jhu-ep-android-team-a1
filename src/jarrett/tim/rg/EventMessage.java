@@ -62,11 +62,14 @@ public class EventMessage
     }//end getEvent
 
     /**
+     * Returns the direction as a string
      * @return the direction
      */
     public String getDirection()
     {
         return direction;
-    }
+        
+    }//end getDirection
 
-}
+}//end EventMessage
+
