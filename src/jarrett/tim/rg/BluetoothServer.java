@@ -159,12 +159,20 @@ public class BluetoothServer
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if ( bluetoothAdapter == null ) {
             activity.showDialog(DIALOG_NO_BLUETOOTH);
-
+            return;
+            
         }
 
         // Make sure bluetooth is enabled
         if ( !bluetoothAdapter.isEnabled() ) {
-            activity.startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), BLUETOOTH_ENABLED);
+            try {
+                activity.startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), BLUETOOTH_ENABLED);
+                
+            } catch ( NullPointerException npe ) {
+                activity.showDialog(DIALOG_NO_BLUETOOTH);
+                
+            }
+            
 
         }
 
