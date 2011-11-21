@@ -45,6 +45,14 @@ public class ActivityMain extends Activity
 	private static final String CLIENT = "Group-A1-Client";
 
 	private static final String QR_SCANNER = "Group-A1-QR-Scanner";
+	
+	/**
+	 * If this is set to true, will try to send button press events via bluetooth otherwise 
+	 * keeps the events local -- mostly for testing purposes in an emulator only. Leave this 
+	 * as true as it will get flipped to false if no bluetooth is detected (and a message will 
+	 * be displayed)
+	 */
+	private boolean bluetoothMode = true;
 
 	/**
      * The list of ThingViews mapped by the values in the spinner
@@ -114,8 +122,11 @@ public class ActivityMain extends Activity
         setContentView(R.layout.main);
         
         //Wire up bluetooth
-        bts = BluetoothServer.factory(this, handler);
-        bts.initBluetooth();
+        if ( bluetoothMode ) {
+            bts = BluetoothServer.factory(this, handler);
+            bts.initBluetooth();
+            
+        }
 
         // Populate our maps based on the gadgets_array
         // -- to add more gadget create an entry in the gadgets_array and create
@@ -142,7 +153,7 @@ public class ActivityMain extends Activity
                             String message = generateMessage(view);
                             if ( message != null ) {
                                 Log.d(SERVER, "Thing fired off this: " + message);
-                                bts.send(message);
+                                sendEvent(message);
                                 
                             }
 
@@ -255,7 +266,8 @@ public class ActivityMain extends Activity
                         event += "|" + direction;
                     }
                    
-                    bts.send(event);
+                    //Send the event
+                    sendEvent(event);
 
                 }// end onClick
 
@@ -356,6 +368,7 @@ public class ActivityMain extends Activity
 
     }// end updateCurrentStateMessage
 
+    
     private String generateMessage(ThingView view)
     {
         String msg = null;
@@ -368,6 +381,18 @@ public class ActivityMain extends Activity
         return msg;
 
     }
+    
+    private void sendEvent(String event)
+    {
+        if ( bluetoothMode ) {
+            bts.send(event);
+            
+        } else {
+            applyEventToCurrentThing(event);
+            
+        }
+        
+    }
 
 
 
@@ -376,8 +401,13 @@ public class ActivityMain extends Activity
     protected Dialog onCreateDialog(int id, Bundle args)
     {
         switch ( id ) {
+            /**
+             * This device does not support bluetooth... fall back to local mode for testing purposes...
+             * This is really just for the emulator...
+             */
             case BluetoothServer.DIALOG_NO_BLUETOOTH:
-                return create("No bluetooth... sadness...", true);
+                bluetoothMode = false;
+                return create("Your device does not appear to support bluetooth. Falling back to local only mode.", false);
 
             case BluetoothServer.DIALOG_WE_HAVE_BLUETOOTH:
                 return create("We have bluetooth! Yippie!", false);
@@ -454,11 +484,7 @@ public class ActivityMain extends Activity
     {
 		switch (requestCode) {
 		case BluetoothServer.BLUETOOTH_ENABLED:
-			if (resultCode == RESULT_OK) {
-				// onBluetoothEnabled(); // CONTINUE INITIALIZATION
-				// showDialog(DIALOG_BLUETOOTH_ENABLED); // ONLY USED FOR
-				// DEMONSTRATION IN CLASS - DO NOT REALLY DO THIS
-			} else {
+			if (resultCode != RESULT_OK) {
 				showDialog(BluetoothServer.DIALOG_USER_IS_EVIL);
 				try {
                     finalize(); //bluetooth not enabled...
