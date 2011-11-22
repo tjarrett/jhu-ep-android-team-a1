@@ -109,6 +109,8 @@ public class BluetoothServer
      * http://developer.android.com/resources/samples/BluetoothChat/index.html
      */
     private ConnectedThread connectedThread;
+    
+    private ConnectThread connectThread;
 
     /**
      * Listen for changes comming from the Bluetooth device
@@ -124,7 +126,7 @@ public class BluetoothServer
         @Override
         public void onReceive(Context context, Intent intent)
         {
-
+            //When a new BluetoothDevice is found, add it to our list
             if ( BluetoothDevice.ACTION_FOUND.equals(intent.getAction()) ) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
@@ -133,15 +135,23 @@ public class BluetoothServer
 
                 }
 
+            //When a new bluetooth device connects, check in to auto connecting back to it    
             } else if ( BluetoothDevice.ACTION_ACL_CONNECTED.equals(intent.getAction()) ) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 
+                //Only connect back if we aren't already connected
                 if ( selectedBluetoothServer == null ) {
                     setSelectedBluetoothDevice(device);
                     
                 }
                 
-                Log.d(RgTools.BLUETOOTH_SERVER, "Connected to: " + device.getName());
+            } else if ( BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(intent.getAction()) ) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                
+                if ( selectedBluetoothServer != null && selectedBluetoothServer.getAddress().equals(device.getAddress()) ) {
+                    clearSelectedBluetoothDevice();
+                    
+                }
                 
             }
 
@@ -188,10 +198,16 @@ public class BluetoothServer
 
         }
         
+        //Still here? Then bluetooth is G2G
+        if ( !isServerRunning() ) {
+            startServer();
+        }
+        
         //Register the activities that we want to listen to on our newly enabled adapter
         activity.registerReceiver(bts.getBroadcastReceiver(), new IntentFilter(BluetoothDevice.ACTION_FOUND));
         activity.registerReceiver(bts.getBroadcastReceiver(), new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED));
         activity.registerReceiver(bts.getBroadcastReceiver(), new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
+        activity.registerReceiver(bts.getBroadcastReceiver(), new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED));
 
     }// end initBlueTooth
 
@@ -240,10 +256,29 @@ public class BluetoothServer
         // - derived from http://developer.android.com/resources/samples/BluetoothChat/index.html
         Log.d(RgTools.CLIENT, "Wiring up thread to connected device: " + device.getName());
         selectedBluetoothServer = device;
-        Thread connectThread = new ConnectThread(getSelectedBluetoothDevice());
+        connectThread = new ConnectThread(getSelectedBluetoothDevice());
         connectThread.start();
         
     }//end setSelectedBluetoothDevice
+    
+    public void clearSelectedBluetoothDevice()
+    {
+        for ( BluetoothDeviceWrapper wrapper : wrappers ) {
+            wrapper.setSelected(false);
+            
+        }
+        
+        //Announce changes
+        bluetoothDeviceListAdapter.fireChange();
+        
+        //Shut off our client thread
+        // - derived from http://developer.android.com/resources/samples/BluetoothChat/index.html
+        selectedBluetoothServer = null;
+        
+        //Disconnect the client thread
+        connectThread.cancel();
+        
+    }
 
     /**
      * Return the currently selected bluetooth device
@@ -851,6 +886,8 @@ public class BluetoothServer
         public void cancel()
         {
             try {
+                inStream.close();
+                outStream.close();
                 bluetoothSocket.close();
                 
             } catch ( IOException e ) {
