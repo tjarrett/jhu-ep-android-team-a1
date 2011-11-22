@@ -798,10 +798,6 @@ public class BluetoothServer
                     // Read from the InputStream
                     bytes = inStream.read(buffer);
                     
-                    //Per Prof. Stanchfield -- send this acknowledgment
-                    outStream.write(1);
-                    outStream.flush();
-                    
                     // Send the obtained bytes to the UI Activity
                     handler.obtainMessage(BLUETOOTH_MESSAGE, bytes, -1, buffer).sendToTarget();
                     
