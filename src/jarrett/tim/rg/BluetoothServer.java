@@ -14,6 +14,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.os.Handler;
@@ -181,11 +182,16 @@ public class BluetoothServer
                 
             } catch ( NullPointerException npe ) {
                 activity.showDialog(DIALOG_NO_BLUETOOTH);
+                return;
                 
-            }
-            
+            }            
 
         }
+        
+        //Register the activities that we want to listen to on our newly enabled adapter
+        activity.registerReceiver(bts.getBroadcastReceiver(), new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        activity.registerReceiver(bts.getBroadcastReceiver(), new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED));
+        activity.registerReceiver(bts.getBroadcastReceiver(), new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
 
     }// end initBlueTooth
 
