@@ -40,11 +40,6 @@ import android.widget.TextView;
  */
 public class ActivityMain extends Activity
 {
-    private static final String SERVER = "Group-A1-Server";
-
-	private static final String CLIENT = "Group-A1-Client";
-
-	private static final String QR_SCANNER = "Group-A1-QR-Scanner";
 	
 	/**
 	 * If this is set to true, will try to send button press events via bluetooth otherwise 
@@ -79,7 +74,7 @@ public class ActivityMain extends Activity
     
     private BluetoothServer bts;
     
-    private String currentPosition = null;
+    private String currentPosition = "unknown";
     
     
     private final Handler handler = new Handler() 
@@ -91,16 +86,17 @@ public class ActivityMain extends Activity
                 case BluetoothServer.BLUETOOTH_MESSAGE:
                     byte[] buffer = (byte[])msg.obj;
                     String content = new String(buffer, 0, msg.arg1);
-                    Log.d(SERVER, "Received " + content);
+                    Log.d(RgConstants.SERVER, "Received " + content);
                     
                     //Message is a server response...
                     if ( content.indexOf("[") != -1 ) {
                         //I can ignore this as the client
-                        Log.d(CLIENT, "Server responded with: " + content);
+                        Log.d(RgConstants.CLIENT, "Server responded with: " + content);
                         
                     } else {
                         //I'm the server so I need to keep going
-                        Log.d(SERVER, "Got " + content + " from client");
+                    	createNotification("Receiving ", content, android.R.drawable.ic_input_add);
+                        Log.d(RgConstants.SERVER, "Got " + content + " from client");
                         applyEventToCurrentThing(content);
                         
                     }
@@ -152,7 +148,7 @@ public class ActivityMain extends Activity
 
                             String message = generateMessage(view);
                             if ( message != null ) {
-                                Log.d(SERVER, "Thing fired off this: " + message);
+                                Log.d(RgConstants.SERVER, "Thing fired off this: " + message);
                                 sendEvent(message);
                                 
                             }
@@ -245,7 +241,7 @@ public class ActivityMain extends Activity
                 {
                     String text = ((Button)(btnClicked)).getText().toString();
                     
-                    String event = "0,1|" + text;
+                    String event = currentPosition + "|" + text;
                     
 
                     String direction = "ALL";
@@ -384,6 +380,7 @@ public class ActivityMain extends Activity
     
     private void sendEvent(String event)
     {
+    	createNotification("Sending Event", event, android.R.drawable.ic_menu_share);
         if ( bluetoothMode ) {
             bts.send(event);
             
@@ -468,11 +465,11 @@ public class ActivityMain extends Activity
                 startActivityForResult(new Intent(this, ActivityBluetooth.class), BluetoothServer.SELECTING_DEVICE);
                 return true;
             case R.id.qr_scanning:
-            	Log.d(QR_SCANNER, "Initiating QR Scan");
+            	Log.d(RgConstants.QR_SCANNER, "Initiating QR Scan");
             	IntentIntegrator integrator = new IntentIntegrator(this);
             	integrator.initiateScan();
 
-            	Log.d(QR_SCANNER, " --------------- Got thing:  " + integrator.getMessage());
+            	Log.d(RgConstants.QR_SCANNER, " --------------- Got thing:  " + integrator.getMessage());
             	
         }
         return super.onMenuItemSelected(featureId, item);
@@ -512,9 +509,9 @@ public class ActivityMain extends Activity
 				String ntf_title = "RG Location Set";
 				String ntf_text = "Scan Position Returned: " + scanResult.getContents();
 				
-				createNotification(ntf_title, ntf_text);
+				createNotification(ntf_title, ntf_text, android.R.drawable.ic_menu_mylocation);
 				
-				Log.d(QR_SCANNER, "Scan Position Returned: " + scanResult.getContents());
+				Log.d(RgConstants.QR_SCANNER, "Scan Position Returned: " + scanResult.getContents());
 				currentPosition = scanResult.getContents();
 			}
 			break;
@@ -524,11 +521,11 @@ public class ActivityMain extends Activity
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-	private void createNotification(String ntf_title, String ntf_text) {
+	public void createNotification(String ntf_title, String ntf_text, int icon) {
 		String ns = Context.NOTIFICATION_SERVICE;
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
 		
-		Notification notification = new Notification(android.R.drawable.ic_menu_mylocation, ntf_text, System.currentTimeMillis());
+		Notification notification = new Notification(icon, ntf_text, System.currentTimeMillis());
 
 		Intent notificationIntent = new Intent(this, ActivityMain.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
