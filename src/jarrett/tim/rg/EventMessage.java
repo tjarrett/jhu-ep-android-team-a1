@@ -1,5 +1,7 @@
 package jarrett.tim.rg;
 
+import android.util.Log;
+
 /**
  * Class for parsing evts sent around via bluetooth and breaking it into it's component parts
  * @author tjarrett
@@ -22,7 +24,7 @@ public class EventMessage
      * @param evt   The event being sent in -- looks something like: 0,1|Heat|UP
      */
     public EventMessage(String evt)
-    {
+    {        
         //Split on |
         String[] bits = evt.split("\\|");
         
@@ -47,7 +49,8 @@ public class EventMessage
         }
         
         //Otherwise error
-        throw new RuntimeException("Kaboom!");
+        Log.d(ActivityMain.DEBUG, "Malformed input received: " + evt);
+        //throw new RuntimeException("Kaboom!");
         
     }//end Constructor
 
