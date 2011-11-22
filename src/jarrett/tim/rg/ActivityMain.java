@@ -68,9 +68,6 @@ public class ActivityMain extends Activity
      * The TextView that shows the current state
      */
     private TextView currentState;
-
-    // the currently-selected target server device
-    private BluetoothDevice selectedDevice;
     
     private BluetoothServer bts;
     
@@ -254,6 +251,9 @@ public class ActivityMain extends Activity
 
                     } else if ( "Reset".equals(text) || "Register".equals(text) ) {
                         direction = null;
+                        
+                    } else if ( "Start".equals(text) ) {
+                        //Start stays local...
                         
                     }
 
@@ -493,14 +493,14 @@ public class ActivityMain extends Activity
 			}
 			break;
 		case BluetoothServer.SELECTING_DEVICE:
-			if (resultCode == RESULT_OK) {
+/*			if (resultCode == RESULT_OK) {
 				selectedDevice = data.getParcelableExtra("device");
 				Log.d("Tim", "Got the device...");
 				// bts.sendMessageToServer("Go go gadget arms");
 				// ((TextView)findViewById(R.id.selected_device)).setText(selectedDevice.getName());
 			} else {
 				// ((TextView)findViewById(R.id.selected_device)).setText("NO DEVICE SELECTED");
-			}
+			}*/
 			break;
 		case IntentIntegrator.REQUEST_CODE:
 			IntentResult scanResult = IntentIntegrator.parseActivityResult(
