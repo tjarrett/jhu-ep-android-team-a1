@@ -6,10 +6,6 @@ import com.google.zxing.integration.android.IntentResult;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -39,13 +35,7 @@ import android.widget.TextView;
  * 
  */
 public class ActivityMain extends Activity
-{
-    public static final String SERVER = "Group-A1-Server";
-
-	public static final String CLIENT = "Group-A1-Client";
-
-	public static final String QR_SCANNER = "Group-A1-QR-Scanner";
-	
+{	
 	public static final String DEBUG = "A1-DEBUG";
 	
 	/**
