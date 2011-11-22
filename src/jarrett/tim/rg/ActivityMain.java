@@ -511,6 +511,10 @@ public class ActivityMain extends Activity
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
+			} else {
+	            if ( bluetoothMode && !bts.isServerRunning() ) {
+	                bts.startServer();
+	            }
 			}
 			break;
 		case BluetoothServer.SELECTING_DEVICE:
