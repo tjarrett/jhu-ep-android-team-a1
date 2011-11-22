@@ -110,22 +110,11 @@ public class ActivityBluetooth extends Activity
         
     }//end onCreate
     
-    @Override protected void onStart() {
-        super.onStart();
-        registerReceiver(bts.getBroadcastReceiver(), new IntentFilter(BluetoothDevice.ACTION_FOUND));
-        registerReceiver(bts.getBroadcastReceiver(), new IntentFilter(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED));
-    }
-    
     @Override protected void onPause()
     {
         bts.stopDeviceDiscovery();
         super.onPause();
         
-    }
-    
-    @Override protected void onDestroy() {
-        unregisterReceiver(bts.getBroadcastReceiver());
-        super.onDestroy();
     }
 
     private void updateServerButton(Button b)
