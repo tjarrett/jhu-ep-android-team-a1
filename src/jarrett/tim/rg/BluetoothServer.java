@@ -132,6 +132,16 @@ public class BluetoothServer
 
                 }
 
+            } else if ( BluetoothDevice.ACTION_ACL_CONNECTED.equals(intent.getAction()) ) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                
+                if ( selectedBluetoothServer == null ) {
+                    setSelectedBluetoothDevice(device);
+                    
+                }
+                
+                Log.d(RgTools.BLUETOOTH_SERVER, "Connected to: " + device.getName());
+                
             }
 
         }// end onReceive
@@ -196,29 +206,37 @@ public class BluetoothServer
      */
     public void setSelectedBluetoothDevice(int position)
     {
-        //unselect all devices
+        setSelectedBluetoothDevice(wrappers.get(position).getBluetoothDevice());
+
+    }//end setSelectedBluetoothDevice
+    
+    /**
+     * Set the selected remote device 
+     * @param device
+     */
+    public void setSelectedBluetoothDevice(BluetoothDevice device)
+    {
         for ( BluetoothDeviceWrapper wrapper : wrappers ) {
-            wrapper.setSelected(false);
-
+            if ( wrapper.getBluetoothDevice().getAddress().equals(device.getAddress()) ) {
+                wrapper.setSelected(true);
+                
+            } else {
+                wrapper.setSelected(false);
+                
+            }
+            
         }
-
-        //select the device at position
-        wrappers.get(position).setSelected(true);
-
-        //Keep track of the most recently selected device
-        //We do this because the position will quit working when we leave the Activity that has the 
-        //list of devices GUI
-        selectedBluetoothServer = wrappers.get(position).getBluetoothDevice();
-
-        //Keep off our client thread
-        // - derived from http://developer.android.com/resources/samples/BluetoothChat/index.html
-        Log.d(RgTools.CLIENT, "Wiring up thread to connected device");
-        Thread connectThread = new ConnectThread(getSelectedBluetoothDevice());
-        connectThread.start();
-
+        
         //Announce changes
         bluetoothDeviceListAdapter.fireChange();
-
+        
+        //Keep off our client thread
+        // - derived from http://developer.android.com/resources/samples/BluetoothChat/index.html
+        Log.d(RgTools.CLIENT, "Wiring up thread to connected device: " + device.getName());
+        selectedBluetoothServer = device;
+        Thread connectThread = new ConnectThread(getSelectedBluetoothDevice());
+        connectThread.start();
+        
     }//end setSelectedBluetoothDevice
 
     /**
@@ -227,12 +245,7 @@ public class BluetoothServer
      */
     public BluetoothDevice getSelectedBluetoothDevice()
     {
-        if ( selectedBluetoothServer != null ) {
-            return selectedBluetoothServer;
-
-        }
-
-        return null;
+        return selectedBluetoothServer;
 
     }//end getSelectedBluetoothDevice
 
