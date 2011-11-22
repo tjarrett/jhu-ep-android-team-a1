@@ -40,6 +40,13 @@ import android.widget.TextView;
  */
 public class ActivityMain extends Activity
 {
+    public static final String SERVER = "Group-A1-Server";
+
+	public static final String CLIENT = "Group-A1-Client";
+
+	public static final String QR_SCANNER = "Group-A1-QR-Scanner";
+	
+	public static final String DEBUG = "A1-DEBUG";
 	
 	/**
 	 * If this is set to true, will try to send button press events via bluetooth otherwise 
@@ -84,6 +91,11 @@ public class ActivityMain extends Activity
                     byte[] buffer = (byte[])msg.obj;
                     String content = new String(buffer, 0, msg.arg1);
                     Log.d(RgTools.SERVER, "Received " + content);
+                    
+                    //Swallow acknowledgements
+                    if ( content.trim().equals("") ) {
+                        return;
+                    }
                     
                     //Message is a server response...
                     if ( content.indexOf("[") != -1 ) {
