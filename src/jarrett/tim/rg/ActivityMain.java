@@ -6,9 +6,12 @@ import com.google.zxing.integration.android.IntentResult;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -254,18 +257,25 @@ public class ActivityMain extends Activity
                     } else if ( "Reset".equals(text) || "Register".equals(text) ) {
                         direction = null;
                         
-                    } else if ( "Start".equals(text) ) {
-                        //Start stays local...
-                        
-                    }
+                    } 
 
                     //Append direction if it makes sense
                     if ( direction != null ) {
                         event += "|" + direction;
                     }
+                    
+                    //If it's start, it stays local always
+                    if ( "Start".equals(text) ) {
+                        //Start always stays local
+                        applyEventToCurrentThing(event);
+                        
+                    } else {
+                        //Send the event (potentially out over bluetooth)
+                        sendEvent(event);
+                        
+                    }
                    
-                    //Send the event
-                    sendEvent(event);
+                    
 
                 }// end onClick
 
@@ -314,6 +324,15 @@ public class ActivityMain extends Activity
         frame = (FrameLayout)findViewById(R.id.frame);
 
     }// end onCreate
+
+    /**
+     * Called just before the activity is destroyed
+     */
+    @Override protected void onDestroy() {
+        //unregister any of our broadcast receivers
+        unregisterReceiver(bts.getBroadcastReceiver());
+        super.onDestroy();
+    }//end onDestroy
 
     /**
      * Update the image that is being displayed...
@@ -372,7 +391,7 @@ public class ActivityMain extends Activity
         String msg = null;
 
         if ( view.getEmits() != null ) {
-            msg = "0,1|" + view.getEmits();
+            msg = currentPosition + "|" + view.getEmits();
 
         }
 
