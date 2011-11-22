@@ -86,17 +86,17 @@ public class ActivityMain extends Activity
                 case BluetoothServer.BLUETOOTH_MESSAGE:
                     byte[] buffer = (byte[])msg.obj;
                     String content = new String(buffer, 0, msg.arg1);
-                    Log.d(RgConstants.SERVER, "Received " + content);
+                    Log.d(RgTools.SERVER, "Received " + content);
                     
                     //Message is a server response...
                     if ( content.indexOf("[") != -1 ) {
                         //I can ignore this as the client
-                        Log.d(RgConstants.CLIENT, "Server responded with: " + content);
+                        Log.d(RgTools.CLIENT, "Server responded with: " + content);
                         
                     } else {
                         //I'm the server so I need to keep going
-                    	createNotification("Receiving ", content, android.R.drawable.ic_input_add);
-                        Log.d(RgConstants.SERVER, "Got " + content + " from client");
+                    	RgTools.createNotification(getApplicationContext(), "Receiving ", content, android.R.drawable.ic_input_add);
+                        Log.d(RgTools.SERVER, "Got " + content + " from client");
                         applyEventToCurrentThing(content);
                         
                     }
@@ -148,7 +148,7 @@ public class ActivityMain extends Activity
 
                             String message = generateMessage(view);
                             if ( message != null ) {
-                                Log.d(RgConstants.SERVER, "Thing fired off this: " + message);
+                                Log.d(RgTools.SERVER, "Thing fired off this: " + message);
                                 sendEvent(message);
                                 
                             }
@@ -380,7 +380,7 @@ public class ActivityMain extends Activity
     
     private void sendEvent(String event)
     {
-    	createNotification("Sending Event", event, android.R.drawable.ic_menu_share);
+    	RgTools.createNotification(getApplicationContext(), "Sending Event", event, android.R.drawable.ic_menu_share);
         if ( bluetoothMode ) {
             bts.send(event);
             
@@ -465,11 +465,11 @@ public class ActivityMain extends Activity
                 startActivityForResult(new Intent(this, ActivityBluetooth.class), BluetoothServer.SELECTING_DEVICE);
                 return true;
             case R.id.qr_scanning:
-            	Log.d(RgConstants.QR_SCANNER, "Initiating QR Scan");
+            	Log.d(RgTools.QR_SCANNER, "Initiating QR Scan");
             	IntentIntegrator integrator = new IntentIntegrator(this);
             	integrator.initiateScan();
 
-            	Log.d(RgConstants.QR_SCANNER, " --------------- Got thing:  " + integrator.getMessage());
+            	Log.d(RgTools.QR_SCANNER, " --------------- Got thing:  " + integrator.getMessage());
             	
         }
         return super.onMenuItemSelected(featureId, item);
@@ -509,9 +509,9 @@ public class ActivityMain extends Activity
 				String ntf_title = "RG Location Set";
 				String ntf_text = "Scan Position Returned: " + scanResult.getContents();
 				
-				createNotification(ntf_title, ntf_text, android.R.drawable.ic_menu_mylocation);
+				RgTools.createNotification(getApplicationContext(), ntf_title, ntf_text, android.R.drawable.ic_menu_mylocation);
 				
-				Log.d(RgConstants.QR_SCANNER, "Scan Position Returned: " + scanResult.getContents());
+				Log.d(RgTools.QR_SCANNER, "Scan Position Returned: " + scanResult.getContents());
 				currentPosition = scanResult.getContents();
 			}
 			break;
@@ -521,17 +521,6 @@ public class ActivityMain extends Activity
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-	public void createNotification(String ntf_title, String ntf_text, int icon) {
-		String ns = Context.NOTIFICATION_SERVICE;
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
-		
-		Notification notification = new Notification(icon, ntf_text, System.currentTimeMillis());
-
-		Intent notificationIntent = new Intent(this, ActivityMain.class);
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-		notification.setLatestEventInfo(this, ntf_title, ntf_text, contentIntent);
-		mNotificationManager.notify(1, notification);
-	}
 
 
 

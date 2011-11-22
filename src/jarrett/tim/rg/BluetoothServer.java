@@ -212,7 +212,7 @@ public class BluetoothServer
 
         //Keep off our client thread
         // - derived from http://developer.android.com/resources/samples/BluetoothChat/index.html
-        Log.d(RgConstants.CLIENT, "Wiring up thread to connected device");
+        Log.d(RgTools.CLIENT, "Wiring up thread to connected device");
         Thread connectThread = new ConnectThread(getSelectedBluetoothDevice());
         connectThread.start();
 
@@ -371,7 +371,7 @@ public class BluetoothServer
      */
     private void manageConnectedSocket(BluetoothSocket socket)
     {
-        Log.d(RgConstants.BLUETOOTH_SERVER, "Managing connected socket");
+        Log.d(RgTools.BLUETOOTH_SERVER, "Managing connected socket");
         connectedThread = new ConnectedThread(socket);
         connectedThread.start();
 
@@ -879,7 +879,7 @@ public class BluetoothServer
                 tmp = device.createRfcommSocketToServiceRecord(BluetoothServer.uuid);
                 
             } catch ( IOException e ) {
-                Log.d(RgConstants.CLIENT, "Could not open RF comm socket");
+                Log.d(RgTools.CLIENT, "Could not open RF comm socket");
                 e.printStackTrace();
 
             }
@@ -896,11 +896,13 @@ public class BluetoothServer
             // Cancel discovery because it will slow down the connection
             bluetoothAdapter.cancelDiscovery();
 
-            Log.d(RgConstants.CLIENT, "Running client thread...");
+            Log.d(RgTools.CLIENT, "Running client thread...");
 
             try {
                 // Do work to manage the connection (in a separate thread)
-                Log.d(RgConstants.CLIENT, "Managing socket with device: " + bluetoothDevice.getName());
+                Log.d(RgTools.CLIENT, "Managing socket with device: " + bluetoothDevice.getName());
+                
+                RgTools.createNotification(activity.getApplicationContext(), "Device Connected", bluetoothDevice.getName(), android.R.drawable.ic_menu_info_details);
                 
                 // Connect the device through the socket. This will block
                 // until it succeeds or throws an exception
@@ -911,11 +913,11 @@ public class BluetoothServer
                 try {
                     bluetoothSocket.close();
                 } catch ( IOException closeException ) {
-                    Log.d(RgConstants.CLIENT, "Connection closed");
+                    Log.d(RgTools.CLIENT, "Connection closed");
 
                 }
 
-                Log.d(RgConstants.CLIENT, "Returning from ConnectThread");
+                Log.d(RgTools.CLIENT, "Returning from ConnectThread");
                 return;
             }
 
