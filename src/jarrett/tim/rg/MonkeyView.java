@@ -38,32 +38,32 @@ public class MonkeyView extends ThingView
         
         //Add in all the appropriate transitions...
         addTransition(State.Bored, Event.Water, State.Wet);
-        addTransition(State.Bored, Event.Heat, State.Burning);
-        addTransition(State.Bored, Event.Alex, State.ClappingWide, Emit.ALEX_ALL);
+        addTransition(State.Bored, Event.Heat, State.Burning, Emit.HEAT_UP);
+        addTransition(State.Bored, Event.Alex, State.ClappingWide, Emit.CLAP_ALL);
         
-        addTransition(State.Wet, Event.Alex, State.WetClappingWide);
+        addTransition(State.Wet, Event.Alex, State.WetClappingWide, Emit.CLAP_ALL);
         addTransition(State.Wet, Event.Heat, State.Bored);
         
-        addTransition(State.WetClappingWide, Event.Heat, State.ClappingClosed);
-        addTransition(State.WetClappingWide, Event.Alex, State.WetClappingClosed, Emit.ALEX_ALL); //as I understood the first assignment
-        addTransition(State.WetClappingWide, Event.Pulse, State.WetClappingClosed);//what the given state diagram indicates
+        addTransition(State.WetClappingWide, Event.Heat, State.ClappingClosed, Emit.CLAP_ALL);
+        addTransition(State.WetClappingWide, Event.Alex, State.WetClappingClosed, Emit.CLAP_ALL); //as I understood the first assignment
+        addTransition(State.WetClappingWide, Event.Pulse, State.WetClappingClosed, Emit.CLAP_ALL);//what the given state diagram indicates
 
-        addTransition(State.WetClappingClosed, Event.Heat, State.ClappingWide);
-        addTransition(State.WetClappingClosed, Event.Alex, State.WetClappingWide, Emit.ALEX_ALL); //as I understood the first assignment
-        addTransition(State.WetClappingClosed, Event.Pulse, State.WetClappingWide);//what the given state diagram indicates
+        addTransition(State.WetClappingClosed, Event.Heat, State.ClappingWide, Emit.CLAP_ALL);
+        addTransition(State.WetClappingClosed, Event.Alex, State.WetClappingWide, Emit.CLAP_ALL); //as I understood the first assignment
+        addTransition(State.WetClappingClosed, Event.Pulse, State.WetClappingWide, Emit.CLAP_ALL);//what the given state diagram indicates
 
-        addTransition(State.ClappingWide, Event.Heat, State.Burning);
-        addTransition(State.ClappingWide, Event.Water, State.WetClappingClosed);
-        addTransition(State.ClappingWide, Event.Alex, State.ClappingClosed, Emit.ALEX_ALL); //as I understood the first assignment
-        addTransition(State.ClappingWide, Event.Pulse, State.ClappingClosed); //what the given state diagram indicates
+        addTransition(State.ClappingWide, Event.Heat, State.Burning, Emit.HEAT_UP);
+        addTransition(State.ClappingWide, Event.Water, State.WetClappingClosed, Emit.CLAP_ALL);
+        addTransition(State.ClappingWide, Event.Alex, State.ClappingClosed, Emit.CLAP_ALL); //as I understood the first assignment
+        addTransition(State.ClappingWide, Event.Pulse, State.ClappingClosed, Emit.CLAP_ALL); //what the given state diagram indicates
 
-        addTransition(State.ClappingClosed, Event.Heat, State.Burning);
-        addTransition(State.ClappingClosed, Event.Water, State.WetClappingWide);
-        addTransition(State.ClappingClosed, Event.Alex, State.ClappingWide, Emit.ALEX_ALL); //as I understood the first assignment
-        addTransition(State.ClappingClosed, Event.Pulse, State.ClappingWide); //what the given state diagram indicates
+        addTransition(State.ClappingClosed, Event.Heat, State.Burning, Emit.HEAT_UP);
+        addTransition(State.ClappingClosed, Event.Water, State.WetClappingWide, Emit.CLAP_ALL);
+        addTransition(State.ClappingClosed, Event.Alex, State.ClappingWide, Emit.CLAP_ALL); //as I understood the first assignment
+        addTransition(State.ClappingClosed, Event.Pulse, State.ClappingWide, Emit.CLAP_ALL); //what the given state diagram indicates
 
-        addTransition(State.Burning, Event.Heat, State.Ashes);
-        addTransition(State.Burning, Event.Pulse, State.Ashes);
+        addTransition(State.Burning, Event.Heat, State.Ashes, Emit.HEAT_UP);
+        addTransition(State.Burning, Event.Pulse, State.Ashes, Emit.HEAT_UP);
         addTransition(State.Burning, Event.Water, State.Bored); //from first assignment -- not in the state diagram given for the second assignment
         
         //Build our state-to-image map
