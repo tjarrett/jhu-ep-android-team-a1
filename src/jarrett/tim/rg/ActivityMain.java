@@ -187,8 +187,11 @@ public class ActivityMain extends Activity
                                         
                                         Log.d(RgTools.SERVER, "Thing fired off this: " + finalMsg);
                                         
-                                        //Send the message
-                                        sendEvent(finalMsg);
+                                        if ( bluetoothMode ) {
+                                            //Send the message
+                                            sendEvent(finalMsg);
+                                            
+                                        }
                                         
                                     }//end for
                                     
