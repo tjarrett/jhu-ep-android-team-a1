@@ -31,7 +31,7 @@ public class CleatView extends ThingView
         reset();
         
         //Add in all the appropriate transitions...
-        addTransition(State.Exists, Event.Pulse, State.Exists);
+        addTransition(State.Exists, Event.Pull, State.Exists, Emit.PULL_LEFT);
 
         //Build our state-to-image map
         addStateImage(State.Exists, "cleat_exists");
