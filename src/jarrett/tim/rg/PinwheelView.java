@@ -69,7 +69,16 @@ public class PinwheelView extends ThingView
     public void receiveEvent(String event)
     {    
         //Translate the event
-        EventMessage em = new EventMessage(event);        
+        EventMessage em;
+        
+        try {
+            em = EventMessage.parse(event);
+            
+        } catch ( Exception e ) {
+            //Something went wrong, complain about it but swallow the error and continue on
+            RgTools.createNotification(this.context, "Invalid event", "Invalid event " + event + " received", android.R.drawable.ic_menu_share);            
+            return;
+        }        
         
         //Animation makes this less straightforward than the others because we can 
         //interrupt a state ...
