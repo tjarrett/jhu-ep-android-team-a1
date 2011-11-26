@@ -219,6 +219,12 @@ abstract public class ThingView extends ImageView
         
     }//end reset
     
+    /**
+     * Given a string emits, tries to match it up to an Emit constant and returns a list 
+     * of responses. Override this method for ropes and wires to deal with BOTH and OPPOSITE
+     * @param emits
+     * @return
+     */
     protected List<String> generateEmitsList(String emits)
     {
         List<String> emitList = new LinkedList<String>();
@@ -409,6 +415,7 @@ abstract public class ThingView extends ImageView
          * We are guranteeing that we at least have the nextState
          * @param nextState
          */
+        @SuppressWarnings("unused")
         public StateTransitionPackage(ThingState nextState)
         {
             this.nextState = nextState;
@@ -456,6 +463,7 @@ abstract public class ThingView extends ImageView
         /**
          * @param emits the emits to set
          */
+        @SuppressWarnings("unused")
         public void setEmits(List<String> emits)
         {
             this.emits = emits;
