@@ -93,12 +93,12 @@ public class ActivityMain extends Activity
                     //Message is a server response...
                     if ( content.indexOf("[") != -1 ) {
                         //I can ignore this as the client
-                        Log.d(RgTools.CLIENT, "Server responded with: " + content);
+                        RgTools.createNotification(getApplicationContext(), "Receiving Response", content, android.R.drawable.ic_input_add); //This doesn't work when multiple responses coming in succession
+                        Log.d(RgTools.CLIENT, content);
                         
                     } else {
                         //I'm the server so I need to keep going
                     	RgTools.createNotification(getApplicationContext(), "Receiving ", content, android.R.drawable.ic_input_add);
-                        Log.d(RgTools.SERVER, "Got " + content + " from client");
                         applyEventToCurrentThing(content);
                         
                     }
@@ -148,13 +148,23 @@ public class ActivityMain extends Activity
                         if ( view == currentThing ) {
                             updateCurrentStateMessage();
 
-                            String message = generateMessage(view);
-                            if ( message != null ) {
-                                Log.d(RgTools.SERVER, "Thing fired off this: " + message);
-                                sendEvent(message);
+                            if ( view.getEmits() != null ) {
+                                List<String> emits = view.getEmits();
+                                if ( emits.size() > 0 ) {
+                                    for ( String msg : emits ) {
+                                        String finalMsg = currentPosition + "|" + msg + "[";
+                                        Log.d(RgTools.SERVER, "Thing fired off this: " + finalMsg);
+                                        sendEvent(finalMsg);
+                                        
+                                        
+                                    }//end for
+                                    
+                                    
+                                }
                                 
-                            }
+                                
 
+                            }
 
                         }
 
@@ -384,21 +394,11 @@ public class ActivityMain extends Activity
         currentState.setText("Current State: " + currentThing.getState().toString());
 
     }// end updateCurrentStateMessage
-
     
-    private String generateMessage(ThingView view)
-    {
-        String msg = null;
-
-        if ( view.getEmits() != null ) {
-            msg = currentPosition + "|" + view.getEmits();
-
-        }
-
-        return msg;
-
-    }
-    
+    /**
+     * Send the given event to the widget (either over bluetooth or locally)
+     * @param event
+     */
     private void sendEvent(String event)
     {
     	RgTools.createNotification(getApplicationContext(), "Sending Event", event, android.R.drawable.ic_menu_share);
@@ -410,7 +410,7 @@ public class ActivityMain extends Activity
             
         }
         
-    }
+    }//end sendEvent
 
 
 
