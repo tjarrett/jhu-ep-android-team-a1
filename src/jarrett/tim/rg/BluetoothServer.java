@@ -872,6 +872,7 @@ public class BluetoothServer
         {
             try {
                 outStream.write(bytes);
+                outStream.flush();
                 
             } catch ( IOException e ) {
                 e.printStackTrace();
