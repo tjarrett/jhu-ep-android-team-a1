@@ -57,7 +57,7 @@ abstract public class ThingView extends ImageView
     /**
      * The event that is emitted by the last state change. Can be null.
      */
-    private String emits;
+    private List<String> emits;
 
     /**
      * Constructor
@@ -112,7 +112,7 @@ abstract public class ThingView extends ImageView
     /**
      * @return the emits
      */
-    public String getEmits()
+    public List<String> getEmits()
     {
         return emits;
     }
@@ -120,7 +120,7 @@ abstract public class ThingView extends ImageView
     /**
      * @param emits the emits to set
      */
-    private void setEmits(String emits)
+    private void setEmits(List<String> emits)
     {
         this.emits = emits;
     }
@@ -142,7 +142,16 @@ abstract public class ThingView extends ImageView
     public void receiveEvent(String event)
     {   
         //Translate the event
-        EventMessage em = new EventMessage(event);
+        EventMessage em;
+        
+        try {
+            em = EventMessage.parse(event);
+            
+        } catch ( Exception e ) {
+            //Something went wrong, complain about it but otherwise just swallow the error...
+            RgTools.createNotification(this.context, "Invalid event", "Invalid event " + event + " received", android.R.drawable.ic_menu_share);            
+            return;
+        }
         
         //Regardless of the Thing, if the event is reset, just reset it...
         if ( em.getEvent() == Event.Reset ) {
@@ -209,6 +218,39 @@ abstract public class ThingView extends ImageView
         notifyStateChangeListeners();
         
     }//end reset
+    
+    protected List<String> generateEmitsList(String emits)
+    {
+        List<String> emitList = new LinkedList<String>();
+        
+        if ( Emit.HEAT_UP.equals(emits) ) {
+            emitList.add(Event.Heat.toString() + "|" + Direction.UP);
+             
+        } else if ( Emit.CLAP_ALL.equals(emits) ) {
+            String evt = Event.Clap.toString();
+            emitList.add(evt + "|" + Direction.UP);
+            emitList.add(evt + "|" + Direction.LEFT);
+            emitList.add(evt + "|" + Direction.RIGHT);
+            emitList.add(evt + "|" + Direction.DOWN);
+            
+        } else if ( Emit.STEAM_RIGHT.equals(emits) ) {
+            emitList.add(Event.Steam.toString() + "|" + Direction.RIGHT);
+            
+        } else if ( Emit.ALEX_ALL.equals(emits) ) {
+            String evt = Event.Alex.toString();
+            emitList.add(evt + "|" + Direction.UP);
+            emitList.add(evt + "|" + Direction.LEFT);
+            emitList.add(evt + "|" + Direction.RIGHT);
+            emitList.add(evt + "|" + Direction.DOWN);
+            
+        } else if ( Emit.WATER_DOWN.equals(emits) ) {
+            emitList.add(Event.Water.toString() + "|" + Direction.DOWN);
+            
+        }
+        
+        return emitList;
+        
+    }//end generateEmitsList
 
     /**
      * Add a transition rule to the internal state table
@@ -219,7 +261,8 @@ abstract public class ThingView extends ImageView
      */
     protected void addTransition(ThingState currentState, Event event, ThingState nextState)
     {
-        addTransition(currentState, event, nextState, null);
+        String emits = null;
+        addTransition(currentState, event, nextState, emits);
         
     }//end addTransition
     
@@ -232,6 +275,20 @@ abstract public class ThingView extends ImageView
      * @param direction
      */
     protected void addTransition(ThingState currentState, Event event, ThingState nextState, String emits)
+    {
+        addTransition(currentState, event, nextState, generateEmitsList(emits));
+        
+    }//end addTransition
+
+    /**
+     * Add a transition rule to the internal state table
+     * @param currentState
+     * @param event
+     * @param nextState
+     * @param emits
+     * @param direction
+     */
+    protected void addTransition(ThingState currentState, Event event, ThingState nextState, List<String> emits)
     {
         //Figure out if we have an entry for this currentState yet, if not add it...
         if ( transitions.get(currentState) == null ) {
@@ -346,7 +403,7 @@ abstract public class ThingView extends ImageView
         /**
          * An event that this state transition emits
          */
-        private String emits;
+        private List<String> emits;
         
         /**
          * We are guranteeing that we at least have the nextState
@@ -364,7 +421,7 @@ abstract public class ThingView extends ImageView
          * @param emits
          * @param direction
          */
-        public StateTransitionPackage(ThingState nextState, String emits)
+        public StateTransitionPackage(ThingState nextState, List<String> emits)
         {
             this.nextState = nextState;
             this.emits = emits;
@@ -382,6 +439,7 @@ abstract public class ThingView extends ImageView
         /**
          * @param nextState the nextState to set
          */
+        @SuppressWarnings("unused")
         public void setNextState(ThingState nextState)
         {
             this.nextState = nextState;
@@ -390,7 +448,7 @@ abstract public class ThingView extends ImageView
         /**
          * @return the emits
          */
-        public String getEmits()
+        public List<String> getEmits()
         {
             return emits;
         }
@@ -398,7 +456,7 @@ abstract public class ThingView extends ImageView
         /**
          * @param emits the emits to set
          */
-        public void setEmits(String emits)
+        public void setEmits(List<String> emits)
         {
             this.emits = emits;
         }     
