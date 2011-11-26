@@ -33,9 +33,9 @@ public class ElectricOutletView extends ThingView
         reset();
         
         //Add in all the appropriate transitions...
-        addTransition(State.On, Event.Water, State.Shocked);
-        addTransition(State.On, Event.Heat, State.Burnt);
-        addTransition(State.On, Event.Pulse, State.On);
+        addTransition(State.On, Event.Water, State.Shocked, Emit.ELECTRIC_OFF_ALL);
+        addTransition(State.On, Event.Heat, State.Burnt, Emit.ELECTRIC_OFF_ALL);
+        addTransition(State.On, Event.Pulse, State.On, Emit.ELECTRIC_ON_ALL);
 
         //Build our state-to-image map
         addStateImage(State.On, "electric_outlet_on");
