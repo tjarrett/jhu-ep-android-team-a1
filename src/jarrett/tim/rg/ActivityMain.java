@@ -69,23 +69,40 @@ public class ActivityMain extends Activity
      */
     private TextView currentState;
     
+    /**
+     * Reference to our bluetooth server
+     */
     private BluetoothServer bts;
     
+    /**
+     * The currentPosition within the grid. Defaults to unknown (maybe we should default to 0,0?)
+     */
     private String currentPosition = "unknown";
     
-    
+    /**
+     * This handler responds to incoming messages via bluetooth
+     * 
+     * @todo Figure out a better way to differentiate between incoming commands and something that has been 
+     *       "emitted" from the remote devices
+     */
     private final Handler handler = new Handler() 
     {
+        /**
+         * Handles incoming messages
+         */
         @Override
         public void handleMessage(Message msg)
         {
             switch ( msg.what ) {
                 case BluetoothServer.BLUETOOTH_MESSAGE:
+                    //Get the buffer out of the message
                     byte[] buffer = (byte[])msg.obj;
+                    
+                    //Turn the buffer into a string
                     String content = new String(buffer, 0, msg.arg1);
                     Log.d(RgTools.SERVER, "Received " + content);
                     
-                    //Swallow acknowledgements
+                    //Swallow acknowledgements (caused by responding with (int)1 which we aren't doing
                     if ( content.trim().equals("") ) {
                         return;
                     }
@@ -105,12 +122,11 @@ public class ActivityMain extends Activity
                     
                     break;
                     
-            }
+            }//end switch
             
         }//end handleMessage
         
-        
-    };
+    };//end Handler
 
     /** Called when the activity is first created. */
     @Override
@@ -133,51 +149,62 @@ public class ActivityMain extends Activity
         // MonkeyView)
         String[] things = getResources().getStringArray(R.array.gadgets_array);
         for ( String thingName : things ) {
+            //Figure out the fully qualified class name for this thing
             String className = this.getClass().getPackage().getName() + "." + thingName.replace(" ", "") + "View";
 
             try {
+                //Create a new instance of this particular thing
                 ThingView view = (ThingView)Class.forName(className).getConstructor(new Class[] { Context.class }).newInstance(this);
+                
+                //Add a state change listener that will be called when the state changes
                 view.addStateChangeListener(new StateChangeListener()
                 {
                     /**
-                     * 
+                     * This will be called when state changes
                      */
                     @Override
                     public void onStateChanged(ThingView view)
                     {
+                        //Since state changes can technically happen on a thing that is not currently displayed, make sure 
+                        //that the currentThing and the view given match
                         if ( view == currentThing ) {
+                            //Update the state message
                             updateCurrentStateMessage();
 
+                            //Figure out if this state change caused more events to be fired... 
                             if ( view.getEmits() != null ) {
+                                //It's not null, but that doesn't mean anything, could be an empty list...
                                 List<String> emits = view.getEmits();
+                                
                                 if ( emits.size() > 0 ) {
+                                    //List wasn't empty so loop through sending each message to the remote server
                                     for ( String msg : emits ) {
+                                        //Build the message
                                         String finalMsg = currentPosition + "|" + msg + "[";
                                         Log.d(RgTools.SERVER, "Thing fired off this: " + finalMsg);
-                                        sendEvent(finalMsg);
                                         
+                                        //Send the message
+                                        sendEvent(finalMsg);
                                         
                                     }//end for
                                     
-                                    
                                 }
-                                
-                                
 
                             }
 
                         }
 
-                    }
+                    }//end onStateChanged
 
                 });
 
+                //Add this thing view to the list
                 thingView.put(thingName, view);
-
 
             } catch ( Exception e ) {
                 // Replace this with a complaint about the class not being found
                 throw new RuntimeException(e);
+                
             }
 
         }// end for
@@ -209,8 +236,6 @@ public class ActivityMain extends Activity
             eventButtons.add(event.toString());
 
         }
-
-        // Collections.sort(eventButtons);
 
         // Now build out the buttons
         for ( String event : eventButtons ) {
@@ -247,15 +272,21 @@ public class ActivityMain extends Activity
              */
             btn.setOnClickListener(new OnClickListener()
             {
-
+                /**
+                 * Handle a button being clicked
+                 */
                 @Override
                 public void onClick(View btnClicked)
                 {
+                    //Get the text of the button
                     String text = ((Button)(btnClicked)).getText().toString();
                     
+                    //Start building our event
                     String event = currentPosition + "|" + text;
                     
-
+                    //Default direction is ALL which is what the homework says to do... but 
+                    //I think this is going to be a problem since we are now supposed to send 
+                    //Right, Left, Up, Down, etc
                     String direction = "ALL";
 
                     if ( "Heat".equals(text) ) {
@@ -274,7 +305,7 @@ public class ActivityMain extends Activity
                         event += "|" + direction;
                     }
                     
-                    //If it's start, it stays local always
+                    //If the button pressed is "Start", keep it local...
                     if ( "Start".equals(text) ) {
                         //Start always stays local
                         applyEventToCurrentThing(event);
@@ -284,8 +315,6 @@ public class ActivityMain extends Activity
                         sendEvent(event);
                         
                     }
-                   
-                    
 
                 }// end onClick
 
@@ -313,20 +342,25 @@ public class ActivityMain extends Activity
         // Listen for spinner changes...
         gadgetSpinner.setOnItemSelectedListener(new OnItemSelectedListener()
         {
-
+            /**
+             * Called when an item is selected
+             */
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id)
             {
                 ThingView tmpThingView = thingView.get(parent.getItemAtPosition(pos).toString());
                 setDisplayedImage(tmpThingView);
 
-            }
+            }//end onItemSelected
 
+            /**
+             * Called when nothing is selected
+             */
             @Override
             public void onNothingSelected(AdapterView<?> parent)
             {
                 // Just swallow it
-            }
+            }//end onNothingSelected
 
         });
 
@@ -338,10 +372,12 @@ public class ActivityMain extends Activity
     /**
      * Called just before the activity is destroyed
      */
-    @Override protected void onDestroy() {
+    @Override protected void onDestroy() 
+    {
         //unregister any of our broadcast receivers
         unregisterReceiver(bts.getBroadcastReceiver());
         super.onDestroy();
+        
     }//end onDestroy
 
     /**
@@ -411,9 +447,7 @@ public class ActivityMain extends Activity
         }
         
     }//end sendEvent
-
-
-
+    
     /** called when the framework needs to create a dialog */
     @Override
     protected Dialog onCreateDialog(int id, Bundle args)
@@ -475,7 +509,7 @@ public class ActivityMain extends Activity
         inflater.inflate(R.menu.main_menu, menu);
         return true;
 
-    }
+    }//end onCreateOptionsMenu
 
     /** handle menu selection to turn the server on and off */
     @Override
@@ -485,69 +519,69 @@ public class ActivityMain extends Activity
             case R.id.bluetooth_settings:
                 startActivityForResult(new Intent(this, ActivityBluetooth.class), BluetoothServer.SELECTING_DEVICE);
                 return true;
+                
             case R.id.qr_scanning:
             	Log.d(RgTools.QR_SCANNER, "Initiating QR Scan");
             	IntentIntegrator integrator = new IntentIntegrator(this);
             	integrator.initiateScan();
-
             	Log.d(RgTools.QR_SCANNER, " --------------- Got thing:  " + integrator.getMessage());
+            	break;
             	
-        }
+        }//end switch
+        
         return super.onMenuItemSelected(featureId, item);
-    }
+        
+    }//end onMenuItemSelected
 
     /** handle results from startActivityForResult() calls */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-		switch (requestCode) {
-		case BluetoothServer.BLUETOOTH_ENABLED:
-			if (resultCode != RESULT_OK) {
-				showDialog(BluetoothServer.DIALOG_USER_IS_EVIL);
-				try {
-                    finalize(); //bluetooth not enabled...
-                    
-                } catch ( Throwable e ) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-			} else {
-	            if ( bluetoothMode && !bts.isServerRunning() ) {
-	                bts.startServer();
-	            }
-			}
-			break;
-		case BluetoothServer.SELECTING_DEVICE:
-/*			if (resultCode == RESULT_OK) {
-				selectedDevice = data.getParcelableExtra("device");
-				Log.d("Tim", "Got the device...");
-				// bts.sendMessageToServer("Go go gadget arms");
-				// ((TextView)findViewById(R.id.selected_device)).setText(selectedDevice.getName());
-			} else {
-				// ((TextView)findViewById(R.id.selected_device)).setText("NO DEVICE SELECTED");
-			}*/
-			break;
-		case IntentIntegrator.REQUEST_CODE:
-			IntentResult scanResult = IntentIntegrator.parseActivityResult(
-					requestCode, resultCode, data);
-			if (scanResult != null) {
-				String ntf_title = "RG Location Set";
-				String ntf_text = "Scan Position Returned: " + scanResult.getContents();
-				
-				RgTools.createNotification(getApplicationContext(), ntf_title, ntf_text, android.R.drawable.ic_menu_mylocation);
-				
-				Log.d(RgTools.QR_SCANNER, "Scan Position Returned: " + scanResult.getContents());
-				currentPosition = scanResult.getContents();
-			}
-			break;
-		default:
-			Log.e("Tim", "unknown activity request code: " + requestCode);
-		}
+		switch ( requestCode ) {
+		    /* handle the case where we tried to enable bluetooth */
+    		case BluetoothServer.BLUETOOTH_ENABLED:
+    		    //Handle the case where it wasn't enabled
+    			if ( resultCode != RESULT_OK ) {
+    				showDialog(BluetoothServer.DIALOG_USER_IS_EVIL);
+    				try {
+                        finalize(); //bluetooth not enabled but it is required so quit
+                        
+                    } catch ( Throwable e ) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                        
+                    }
+    			
+    		    //Otherwise it was enabled so start the BluetoothServer
+    			} else {
+    	            if ( bluetoothMode && !bts.isServerRunning() ) {
+    	                bts.startServer();
+    	                
+    	            }
+    	            
+    			}
+    			break;
+    	
+    	    /* Handle QR code stuff */
+    		case IntentIntegrator.REQUEST_CODE:
+    			IntentResult scanResult = IntentIntegrator.parseActivityResult(
+    					requestCode, resultCode, data);
+    			if ( scanResult != null ) {
+    				String ntf_title = "RG Location Set";
+    				String ntf_text = "Scan Position Returned: " + scanResult.getContents();
+    				
+    				RgTools.createNotification(getApplicationContext(), ntf_title, ntf_text, android.R.drawable.ic_menu_mylocation);
+    				
+    				Log.d(RgTools.QR_SCANNER, "Scan Position Returned: " + scanResult.getContents());
+    				currentPosition = scanResult.getContents();
+    				
+    			}
+    			break;
+    			
+		}//end switch
+		
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-
-
-
+        
+    }//end onActivityResult
 
 }// end ActivityMain
