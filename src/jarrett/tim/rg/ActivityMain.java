@@ -6,12 +6,9 @@ import com.google.zxing.integration.android.IntentResult;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -180,7 +177,14 @@ public class ActivityMain extends Activity
                                     //List wasn't empty so loop through sending each message to the remote server
                                     for ( String msg : emits ) {
                                         //Build the message
-                                        String finalMsg = currentPosition + "|" + msg + "[";
+                                        String finalMsg = currentPosition + "|" + msg;
+                                        
+                                        //Mangle this message so the other server knows it's a response and not a command...
+                                        //This Rube Goldberg Protocol needs some work...
+                                        
+                                        //todo: remove the next line...
+                                        finalMsg = finalMsg + "[";
+                                        
                                         Log.d(RgTools.SERVER, "Thing fired off this: " + finalMsg);
                                         
                                         //Send the message
