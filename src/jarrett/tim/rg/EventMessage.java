@@ -12,45 +12,20 @@ public class EventMessage
     /**
      * The event
      */
-    private Event event;
+    private Event event = null;
     
     /**
      * The direction
      */
-    private String direction;
+    private String direction = null;
     
     /**
      * Constructor
      * @param evt   The event being sent in -- looks something like: 0,1|Heat|UP
      */
-    public EventMessage(String evt)
+    private EventMessage()
     {        
-        //Split on |
-        String[] bits = evt.split("\\|");
-        
-        //Sometimes there won't be a direction... 
-        if ( bits.length == 3 ) {
-            event = Event.valueOf(bits[1]);
-            direction = bits[2];
-            return;
-        }
-        
-        //If it's reset... 
-        if ( evt.toLowerCase().indexOf("reset") != -1 ) {
-            event = Event.Reset;
-            return;
-            
-        }
-        
-        //If it's register
-        if ( evt.toLowerCase().indexOf("register") != -1 ) {
-            event = Event.Register;
-            return;
-        }
-        
-        //Otherwise error
-        Log.d(ActivityMain.DEBUG, "Malformed input received: " + evt);
-        //throw new RuntimeException("Kaboom!");
+
         
     }//end Constructor
 
@@ -73,6 +48,52 @@ public class EventMessage
         return direction;
         
     }//end getDirection
+    
+    /**
+     * Parse the given string (which should be formatted like: 0,1|Heat|UP) and return an EventMessage. 
+     * @param evt
+     * @return
+     * @throws NullPointerException
+     * @throws IllegalArgumentException
+     */
+    static public EventMessage parse(String evt) throws NullPointerException, IllegalArgumentException
+    {
+        //Was getting nulls passed in for some reason... handle that
+        if ( evt == null ) {
+            throw new NullPointerException();
+            
+        }
+        
+        //Split on |
+        String[] bits = evt.split("\\|");
+        
+        EventMessage evm = new EventMessage();
+        
+        //Sometimes there won't be a direction... in case there is, capture it
+        if ( bits.length == 3 ) {
+            evm.event = Event.valueOf(bits[1]);
+            evm.direction = bits[2];
+            return evm;
+        }
+        
+        //If it's reset... 
+        if ( evt.toLowerCase().indexOf("reset") != -1 ) {
+            evm.event = Event.Reset;
+            return evm;
+            
+        }
+        
+        //If it's register
+        if ( evt.toLowerCase().indexOf("register") != -1 ) {
+            evm.event = Event.Register;
+            return evm;
+        }
+        
+        //Otherwise error
+        Log.d(ActivityMain.DEBUG, "Malformed input received: " + evt);
+        throw new IllegalArgumentException("The event " + evt + " is not recognized as valid");
+        
+    }//end parse
 
 }//end EventMessage
 
