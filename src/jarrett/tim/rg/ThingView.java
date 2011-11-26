@@ -249,8 +249,18 @@ abstract public class ThingView extends ImageView
             emitList.add(evt + "|" + Direction.RIGHT);
             emitList.add(evt + "|" + Direction.DOWN);
             
+        } else if ( Emit.ELECTRIC_OFF_ALL.equals(emits) ) {
+            String evt = Event.ElectricOff.toString();
+            emitList.add(evt + "|" + Direction.UP);
+            emitList.add(evt + "|" + Direction.LEFT);
+            emitList.add(evt + "|" + Direction.RIGHT);
+            emitList.add(evt + "|" + Direction.DOWN);
+            
         } else if ( Emit.WATER_DOWN.equals(emits) ) {
             emitList.add(Event.Water.toString() + "|" + Direction.DOWN);
+            
+        } else if ( Emit.PULL_LEFT.equals(emits) ) {
+            emitList.add(Event.Pull.toString() + "|" + Direction.LEFT);
             
         }
         
