@@ -9,6 +9,8 @@ import android.content.Context;
  */
 public class WireUpDownView extends WireView
 {
+	private ThingEnds ends;
+	
     /**
      * Constructor
      * @param context
@@ -26,4 +28,18 @@ public class WireUpDownView extends WireView
         
     }//end WireUpDownView constructor
 
+    /**
+     * Return the ends that we are attached to...
+     */
+	@Override public ThingEnds getEnds() 
+	{
+		if ( ends == null ) {
+			ends = new ThingEnds(Direction.UP, Direction.DOWN);
+			
+		}
+		
+		return ends;
+		
+	}//end getEnds
+	
 }//end WireUpDownView

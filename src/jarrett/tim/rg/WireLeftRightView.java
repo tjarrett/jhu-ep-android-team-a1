@@ -9,12 +9,14 @@ import android.content.Context;
  */
 public class WireLeftRightView extends WireView
 {
+	private ThingEnds ends;
+	
     /**
      * Constructor
      * @param context
      */
     public WireLeftRightView(Context context)
-    {
+    {    	
         super(context);
 
         //Build our state-to-image map
@@ -25,5 +27,20 @@ public class WireLeftRightView extends WireView
         addStateImage(State.Toasted, "wire_toasted_left_right");
         
     }//end WireLeftRightView constructor
+    
+    /**
+     * Return the ends that we are attached to...
+     */
+	@Override public ThingEnds getEnds() 
+	{
+		if ( ends == null ) {
+	    	//Set up our ends...
+	    	ends = new ThingEnds(Direction.LEFT, Direction.RIGHT);
+	    	
+		}
+		
+		return ends;
+		
+	}//end getEnds
 
 }//end WireLeftRightView

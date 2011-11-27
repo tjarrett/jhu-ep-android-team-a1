@@ -17,7 +17,7 @@ public class EventMessage
     /**
      * The direction
      */
-    private String direction = null;
+    private Direction direction = null;
     
     /**
      * Constructor
@@ -43,7 +43,7 @@ public class EventMessage
      * Returns the direction as a string
      * @return the direction
      */
-    public String getDirection()
+    public Direction getDirection()
     {
         return direction;
         
@@ -72,7 +72,7 @@ public class EventMessage
         //Sometimes there won't be a direction... in case there is, capture it
         if ( bits.length == 3 ) {
             evm.event = Event.valueOf(bits[1]);
-            evm.direction = bits[2];
+            evm.direction = Direction.valueOf(bits[2]);
             return evm;
         }
         

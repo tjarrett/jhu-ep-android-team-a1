@@ -322,9 +322,24 @@ public class ActivityMain extends Activity
                         applyEventToCurrentThing(event);
                         
                     } else {
-                        //Send the event (potentially out over bluetooth)
-                        sendEvent(event);
-                        
+                    	//Send out the event -- maybe even over bluetooth
+                    	
+                    	//If it's ElectricOn, send both Up and Right
+                    	if ( "ElectricOn".equals(text) ) {
+                    		sendEvent(currentPosition + "|" + text + "|" + Direction.UP.toString());
+                    		sendEvent(currentPosition + "|" + text + "|" + Direction.RIGHT.toString());
+                    		
+                        //If it's ElectricOff, send Down and left
+                    	} else if ( "ElectricOff".equals(text) ) {
+                    		sendEvent(currentPosition + "|" + text + "|" + Direction.DOWN.toString());
+                    		sendEvent(currentPosition + "|" + text + "|" + Direction.LEFT.toString());                    		
+                    		
+                    	} else {
+                    		//Everything else send the event we constructed
+                    		sendEvent(event);
+                    		
+                    	}
+                    	
                     }
 
                 }// end onClick

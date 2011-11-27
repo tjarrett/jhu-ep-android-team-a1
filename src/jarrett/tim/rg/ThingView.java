@@ -120,7 +120,7 @@ abstract public class ThingView extends ImageView
     /**
      * @param emits the emits to set
      */
-    private void setEmits(List<String> emits)
+    protected void setEmits(List<String> emits)
     {
         this.emits = emits;
     }
@@ -187,8 +187,44 @@ abstract public class ThingView extends ImageView
             //Otherwise, transition the state
             setState(nextState);
             
-            //And record the latest emits and direction...
-            setEmits(pkg.getEmits());
+            //Make a copy of the things that should be emitted in this state change
+            List<String> preEmit = new LinkedList<String>(pkg.getEmits());
+            
+            //Loop through everything that is emits
+            for ( int i=0; i<preEmit.size(); i++ ) {
+            	//Get the test
+            	String response = preEmit.get(i);
+            	
+            	//Split it out
+            	String[] bits = response.split("\\|");
+            	
+            	//There should always be two items... if not just skip forward
+            	if ( bits.length != 2 ) {
+            		continue;
+            		
+            	}
+            	
+            	//Figure out the direction that the response is going to be emitted
+            	Direction direction = Direction.valueOf(bits[1]);
+            	
+            	//If the direction is opposite, then we are probably dealing with a Wire or a Rope (otherwise something is really wrong)
+            	if ( direction == Direction.OPPOSITE ) {
+            		//Figure out the OPPOSITE of the incoming event
+            		Direction opposite = getOpposite(em.getDirection());
+            		
+            		//If the opposite makes sense... (is not null)
+            		if ( opposite != null ) {
+            			//Update the list of things that we are going to output
+            			preEmit.set(i, bits[0] + "|" + opposite.toString());
+            			
+            		}
+            		
+            	}
+            	
+            }//end for i
+            
+            //Send the updated list out as a response
+            setEmits(preEmit);
             
         }
         
@@ -403,6 +439,91 @@ abstract public class ThingView extends ImageView
         }//end for
         
     }//end notifyStateChangeListeners
+    
+    /**
+     * Return the opposite direction for this type of wire or rope. Returns null if 
+     * direction is not a direction that this wire or rope is connected to or if 
+     * this is not a wire or rope...
+     * 
+     * @param direction
+     * @return
+     */
+    public Direction getOpposite(Direction direction)
+    {
+    	ThingEnds ends = getEnds();
+    	
+    	if ( ends == null ) {
+    		return null;
+    		
+    	}
+    	
+    	if ( ends.getEnd1() == direction ) {
+    		return ends.getEnd2();
+    		
+    	} else if ( ends.getEnd2() == direction ) {
+    		return ends.getEnd1();
+    		
+    	}
+    	
+    	return null;
+    	
+    }//end getOpposite
+    
+    /**
+     * Returns the valid ends associated with this Thing. For most things, this will be null because 
+     * they have no ends... If you are implementing a Wire or a Rope you should override...
+     * @return
+     */
+    public ThingEnds getEnds()
+    {
+    	return null;
+    	
+    }//end getEnds
+    
+    /**
+     * Simple class for tracking the two ends of the Wire and Rope classes
+     * @author tjarrett
+     *
+     */
+    protected class ThingEnds
+    {
+    	private Direction end1;
+    	
+    	private Direction end2;
+    	
+    	/**
+    	 * Constructor
+    	 * @param end1
+    	 * @param end2
+    	 */
+    	public ThingEnds(Direction end1, Direction end2)
+    	{
+    		this.end1 = end1;
+    		this.end2 = end2;
+    		
+    	}//end ThingEnds Constructor
+    	
+    	/**
+    	 * Returns the first end
+    	 * @return
+    	 */
+    	public Direction getEnd1()
+    	{
+    		return end1;
+    		
+    	}//end getEnd1
+    	
+    	/**
+    	 * Returns the 2nd end
+    	 * @return
+    	 */
+    	public Direction getEnd2()
+    	{
+    		return end2;
+    		
+    	}//end getEnds2
+    	
+    }//end ThingEnds
     
     /**
      * Class for keeping track of event transitions

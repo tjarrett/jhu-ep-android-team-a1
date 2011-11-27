@@ -6,6 +6,8 @@ public enum Direction
     DOWN,
     LEFT,
     RIGHT,
-    ALL
+    ALL,
+    OPPOSITE,
+    BOTH
 
 }

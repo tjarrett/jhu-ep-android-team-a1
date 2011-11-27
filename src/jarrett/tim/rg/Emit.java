@@ -21,11 +21,15 @@ public class Emit
     
     static public final String ELECTRIC_ON_ALL = "ElectricOn|ALL";
     
+    static public final String ELECTRIC_ON_OPPOSITE = "ElectricOn|OPPOSITE";
+    
     static public final String ELECTRIC_ON_RIGHT = "ElectricOn|RIGHT";
     
     static public final String ELECTRIC_ON_DOWN = "ElectricOn|DOWN";
     
     static public final String ELECTRIC_OFF_ALL = "ElectricOff|ALL";
+
+    static public final String ELECTRIC_OFF_OPPOSITE = "ElectricOff|OPPOSITE";
     
     static public final String ELECTRIC_OFF_RIGHT = "ElectricOff|RIGHT";
     
@@ -39,8 +43,7 @@ public class Emit
     
     static public final String ALEX_ALL = "Alex|ALL";
     
-    static public final String WATER_DOWN = "Water|DOWN";
-    
+    static public final String WATER_DOWN = "Water|DOWN";    
     
     
     /**
