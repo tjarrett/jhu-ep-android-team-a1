@@ -50,7 +50,7 @@ public class PinwheelView extends ThingView
         reset();
         
         //Build our transition tables for our state machine
-        addTransition(State.Stopped, Event.Steam, State.Turning);
+        addTransition(State.Stopped, Event.Steam, State.Turning, Emit.TURN_ALL);
         addTransition(State.Turning, Event.Pulse, State.Stopped);
         
         //Add our images for each state
