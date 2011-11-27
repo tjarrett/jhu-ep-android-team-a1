@@ -39,14 +39,14 @@ public class TVView extends ThingView
         addTransition(State.NoPower, Event.Water, State.Wet);
         
         addTransition(State.Standby, Event.ElectricOff, State.NoPower);
-        addTransition(State.Standby, Event.Turn, State.PowerOn);
-        addTransition(State.Standby, Event.Water, State.Fried);
+        addTransition(State.Standby, Event.Turn, State.PowerOn, Emit.ALEX_ALL);
+        addTransition(State.Standby, Event.Water, State.Fried, Emit.HEAT_UP);
         
         addTransition(State.Wet, Event.Heat, State.NoPower);
-        addTransition(State.Wet, Event.ElectricOn, State.Fried);
+        addTransition(State.Wet, Event.ElectricOn, State.Fried, Emit.HEAT_UP);
         
-        addTransition(State.PowerOn, Event.Pulse, State.PowerOn);
-        addTransition(State.PowerOn, Event.Water, State.Fried);
+        addTransition(State.PowerOn, Event.Pulse, State.PowerOn, Emit.ALEX_ALL);
+        addTransition(State.PowerOn, Event.Water, State.Fried, Emit.HEAT_UP);
         
 
         //Build our state-to-image map

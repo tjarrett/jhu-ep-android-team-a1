@@ -34,7 +34,7 @@ public class WaterCoolerView extends ThingView
         
         //Add in all the appropriate transitions...
         addTransition(State.Empty, Event.Pull, State.Full);
-        addTransition(State.Full, Event.Release, State.Empty);
+        addTransition(State.Full, Event.Release, State.Empty, Emit.WATER_DOWN);
 
         //Build our state-to-image map
         addStateImage(State.Empty, "water_cooler_empty");

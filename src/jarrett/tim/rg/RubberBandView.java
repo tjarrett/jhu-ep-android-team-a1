@@ -32,8 +32,8 @@ public class RubberBandView extends ThingView
         reset();
         
         //Add in all the appropriate transitions...
-        addTransition(State.Intact, Event.Turn, State.Intact);
-        addTransition(State.Intact, Event.Heat, State.Melted);
+        addTransition(State.Intact, Event.Turn, State.Intact, Emit.TURN_ALL);
+        addTransition(State.Intact, Event.Heat, State.Melted, Emit.HEAT_UP);
 
         //Build our state-to-image map
         addStateImage(State.Intact, "rubberband_intact");
