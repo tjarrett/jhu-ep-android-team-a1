@@ -226,49 +226,42 @@ abstract public class ThingView extends ImageView
      * @return
      */
     protected List<String> generateEmitsList(String emits)
-    {
+    {	
+    	//We are always going to return a list...
         List<String> emitList = new LinkedList<String>();
         
-        if ( Emit.HEAT_UP.equals(emits) ) {
-            emitList.add(Event.Heat.toString() + "|" + Direction.UP);
-             
-        } else if ( Emit.CLAP_ALL.equals(emits) ) {
-            String evt = Event.Clap.toString();
-            emitList.add(evt + "|" + Direction.UP);
-            emitList.add(evt + "|" + Direction.LEFT);
-            emitList.add(evt + "|" + Direction.RIGHT);
-            emitList.add(evt + "|" + Direction.DOWN);
-            
-        } else if ( Emit.STEAM_RIGHT.equals(emits) ) {
-            emitList.add(Event.Steam.toString() + "|" + Direction.RIGHT);
-            
-        } else if ( Emit.ALEX_ALL.equals(emits) ) {
-            String evt = Event.Alex.toString();
-            emitList.add(evt + "|" + Direction.UP);
-            emitList.add(evt + "|" + Direction.LEFT);
-            emitList.add(evt + "|" + Direction.RIGHT);
-            emitList.add(evt + "|" + Direction.DOWN);
-            
-        } else if ( Emit.ELECTRIC_ON_ALL.equals(emits) ) {
-            String evt = Event.ElectricOn.toString();
-            emitList.add(evt + "|" + Direction.UP);
-            emitList.add(evt + "|" + Direction.LEFT);
-            emitList.add(evt + "|" + Direction.RIGHT);
-            emitList.add(evt + "|" + Direction.DOWN);            
-            
-        } else if ( Emit.ELECTRIC_OFF_ALL.equals(emits) ) {
-            String evt = Event.ElectricOff.toString();
-            emitList.add(evt + "|" + Direction.UP);
-            emitList.add(evt + "|" + Direction.LEFT);
-            emitList.add(evt + "|" + Direction.RIGHT);
-            emitList.add(evt + "|" + Direction.DOWN);
-            
-        } else if ( Emit.WATER_DOWN.equals(emits) ) {
-            emitList.add(Event.Water.toString() + "|" + Direction.DOWN);
-            
-        } else if ( Emit.PULL_LEFT.equals(emits) ) {
-            emitList.add(Event.Pull.toString() + "|" + Direction.LEFT);
-            
+        //May be that a state change doesn't emit anything...
+    	if ( emits == null ) {
+    		return emitList;
+    		
+    	}
+        
+    	//Still here? Then emits wasn't null... try splitting it apart
+        String[] bits = emits.split("\\|");
+        
+        //Has to be exactly two 
+        if ( bits.length != 2 ) {
+        	
+        	return emitList;
+        	
+        }
+        
+        //Get the event and direction
+        Event event = Event.valueOf(bits[0]);
+        Direction direction = Direction.valueOf(bits[1]);
+        
+        //If direction is ALL then we need to generate 4 messages -- one in each direction
+        switch ( direction ) {
+        	case ALL:
+                emitList.add(event + "|" + Direction.UP);
+                emitList.add(event + "|" + Direction.LEFT);
+                emitList.add(event + "|" + Direction.RIGHT);
+                emitList.add(event + "|" + Direction.DOWN);
+        		break;
+        
+        	default:
+        		emitList.add(emits);
+        		break;
         }
         
         return emitList;
