@@ -36,10 +36,10 @@ public class KettleView extends ThingView
         addTransition(State.Empty, Event.Heat, State.Hot);
         addTransition(State.Empty, Event.Water, State.Full);
         
-        addTransition(State.Hot, Event.Water, State.Full);
+        addTransition(State.Hot, Event.Water, State.Full, Emit.STEAM_RIGHT);
         
-        addTransition(State.Full, Event.Steam, State.Full);
-        addTransition(State.Full, Event.Heat, State.Full);
+        addTransition(State.Full, Event.Steam, State.Full, Emit.STEAM_RIGHT);
+        addTransition(State.Full, Event.Heat, State.Full, Emit.STEAM_RIGHT);
 
         //Build our state-to-image map
         addStateImage(State.Empty, "kettle_empty");
