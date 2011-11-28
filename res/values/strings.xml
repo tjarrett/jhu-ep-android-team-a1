@@ -10,14 +10,14 @@
     <string name="Alex">Alex</string>
     
     <string-array name="gadgets_array">
-        <item>Monkey</item>
-        <item>Christmas Tree</item>
-        <item>Pinwheel</item>
         <item>Candle</item>
+        <item>Christmas Tree</item>
         <item>Clapper</item>
         <item>Cleat</item>
         <item>Electric Outlet</item>
         <item>Kettle</item>
+        <item>Monkey</item>
+        <item>Pinwheel</item>
         <item>Rope Down Right</item>
         <item>Rope Left Right</item>
         <item>Rope Up Down</item>
