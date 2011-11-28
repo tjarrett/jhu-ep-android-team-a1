@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.util.Log;
 import android.widget.ImageView;
 
 /**
@@ -141,6 +142,8 @@ abstract public class ThingView extends ImageView
      */
     public void receiveEvent(String event)
     {   
+    	Log.d("Tim", "Received message: " + event);
+    	
         //Translate the event
         EventMessage em;
         
@@ -174,8 +177,15 @@ abstract public class ThingView extends ImageView
             //a state to transition to...
             StateTransitionPackage pkg = nextStateMap.get(em.getEvent());
             
+            if ( state.toString().equals("Taut") && em.getEvent().toString().equals("Release") ) {
+            	if ( pkg == null ) {
+            		Log.d("Tim", "No match...");
+            	}
+            }
+            
             //Do the check again. This time, we expect null to happen from time-to-time, just ignore it
             if ( pkg == null ) {
+            	Log.d("Tim", "Current State: " + this.state.toString() + "; Current Event: " + em.getEvent().toString());
                 setEmits(null);
                 return;
                 
@@ -188,18 +198,20 @@ abstract public class ThingView extends ImageView
             setState(nextState);
             
             //Make a copy of the things that should be emitted in this state change
-            List<String> preEmit = new LinkedList<String>(pkg.getEmits());
+            List<String> emits = pkg.getEmits();
+            List<String> preEmit = new LinkedList<String>();
             
             //Loop through everything that is emits
-            for ( int i=0; i<preEmit.size(); i++ ) {
+            for ( int i=0; i<emits.size(); i++ ) {
             	//Get the test
-            	String response = preEmit.get(i);
+            	String response = emits.get(i);
             	
             	//Split it out
             	String[] bits = response.split("\\|");
             	
             	//There should always be two items... if not just skip forward
             	if ( bits.length != 2 ) {
+            		preEmit.add(response);
             		continue;
             		
             	}
@@ -209,15 +221,21 @@ abstract public class ThingView extends ImageView
             	
             	//If the direction is opposite, then we are probably dealing with a Wire or a Rope (otherwise something is really wrong)
             	if ( direction == Direction.OPPOSITE ) {
+            		Log.d("Tim", "Came from direction: " + getOppositeDirection(em.getDirection()).toString());
+            		
             		//Figure out the OPPOSITE of the incoming event
-            		Direction opposite = getOpposite(em.getDirection());
+            		Direction opposite = getOppositeEnd(getOppositeDirection(em.getDirection()));
+            		Log.d("Tim", "So opposite end would be... " + opposite);
             		
             		//If the opposite makes sense... (is not null)
             		if ( opposite != null ) {
-            			//Update the list of things that we are going to output
-            			preEmit.set(i, bits[0] + "|" + opposite.toString());
+            			//Push this message into the list of things that we are going to output
+            			preEmit.add(bits[0] + "|" + opposite.toString());
             			
             		}
+            		
+            	} else {
+            		preEmit.add(response);
             		
             	}
             	
@@ -294,11 +312,24 @@ abstract public class ThingView extends ImageView
                 emitList.add(event + "|" + Direction.RIGHT);
                 emitList.add(event + "|" + Direction.DOWN);
         		break;
+        		
+        	case BOTH:
+        		ThingEnds ends = getEnds();
+        		if ( ends == null ) {
+        			emitList.add(emits);
+        			
+        		} else {
+        			emitList.add(event + "|" + ends.getEnd1().toString());
+        			emitList.add(event + "|" + ends.getEnd2().toString());
+        			
+        		}
+        		break;
         
         	default:
         		emitList.add(emits);
         		break;
-        }
+        		
+        }//end switch
         
         return emitList;
         
@@ -448,7 +479,7 @@ abstract public class ThingView extends ImageView
      * @param direction
      * @return
      */
-    public Direction getOpposite(Direction direction)
+    public Direction getOppositeEnd(Direction direction)
     {
     	ThingEnds ends = getEnds();
     	
@@ -467,7 +498,38 @@ abstract public class ThingView extends ImageView
     	
     	return null;
     	
-    }//end getOpposite
+    }//end getOppositeEnd
+    
+    /**
+     * Get the opposite of the given direction. Returns null if originalDirection is not valid
+     * @param originalDirection
+     * @return
+     */
+    static public Direction getOppositeDirection(Direction originalDirection)
+    {
+        Direction flipped;
+        Direction comingFromDirection = originalDirection;
+        
+        if ( comingFromDirection == Direction.UP ) {
+        	flipped = Direction.DOWN;
+        	
+        } else if ( comingFromDirection == Direction.DOWN ) {
+        	flipped = Direction.UP;
+        	
+        } else if ( comingFromDirection == Direction.LEFT ) {
+        	flipped = Direction.RIGHT;
+        	
+        } else if ( comingFromDirection == Direction.RIGHT ) {
+        	flipped = Direction.LEFT;
+        	
+        } else {
+        	return null;
+        	
+        }
+        
+        return flipped;
+    	
+    }//end 
     
     /**
      * Returns the valid ends associated with this Thing. For most things, this will be null because 

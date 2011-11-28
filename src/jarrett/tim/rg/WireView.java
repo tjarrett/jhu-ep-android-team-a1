@@ -79,7 +79,7 @@ public abstract class WireView extends ThingView
         }
 		
         //Still here? Then the event is either electric on or electric off. It has to come in one end and go out the other end...
-        if ( getOpposite(em.getDirection()) == null ) {
+        if ( getOppositeEnd(em.getDirection()) == null ) {
         	//If this returns null, then the direction passed in doesn't match one of the two ends... so the message shouldn't effect us because 
         	//it came from a direction that we are not listening for...
         	return;

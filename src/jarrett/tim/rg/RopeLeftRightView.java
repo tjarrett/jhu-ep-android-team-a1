@@ -9,6 +9,8 @@ import android.content.Context;
  */
 public class RopeLeftRightView extends RopeView
 {
+	private ThingEnds ends;
+	
     /**
      * Constructor
      * @param context
@@ -25,5 +27,20 @@ public class RopeLeftRightView extends RopeView
         addStateImage(State.Ashes, "rope_ashes_left_right");
         
     }//end RopeLeftRightView constructor
+    
+    /**
+     * Return the ends that we are attached to...
+     */
+	@Override public ThingEnds getEnds() 
+	{
+		if ( ends == null ) {
+	    	//Set up our ends...
+	    	ends = new ThingEnds(Direction.LEFT, Direction.RIGHT);
+	    	
+		}
+		
+		return ends;
+		
+	}//end getEnds
 
 }//end RopeLeftRightView

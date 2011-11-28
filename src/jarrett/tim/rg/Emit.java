@@ -11,6 +11,8 @@ public class Emit
     
     static public final String CLAP_ALL = "Clap|ALL";
     
+    static public final String PULL_OPPOSITE = "Pull|OPPOSITE";
+    
     static public final String PULL_LEFT = "Pull|LEFT";
     
     static public final String PULL_RIGHT = "Pull|RIGHT";
@@ -38,6 +40,8 @@ public class Emit
     static public final String STEAM_RIGHT = "Steam|RIGHT";
     
     static public final String TURN_ALL = "Turn|ALL";
+    
+    static public final String RELEASE_OPPOSITE = "Release|OPPOSITE";
     
     static public final String RELEASE_BOTH = "Release|BOTH";
     

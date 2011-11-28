@@ -332,7 +332,17 @@ public class ActivityMain extends Activity
                         //If it's ElectricOff, send Down and left
                     	} else if ( "ElectricOff".equals(text) ) {
                     		sendEvent(currentPosition + "|" + text + "|" + Direction.DOWN.toString());
-                    		sendEvent(currentPosition + "|" + text + "|" + Direction.LEFT.toString());                    		
+                    		sendEvent(currentPosition + "|" + text + "|" + Direction.LEFT.toString());       
+                    		sendEvent(currentPosition + "|" + text + "|" + Direction.RIGHT.toString());
+                    		
+                    	} else if ( "Pull".equals(text) ) {
+                    		sendEvent(currentPosition + "|" + text + "|" + Direction.UP.toString());
+                    		sendEvent(currentPosition + "|" + text + "|" + Direction.RIGHT.toString());
+                    		sendEvent(currentPosition + "|" + text + "|" + Direction.LEFT.toString());
+                    		
+                    	} else if ( "Release".equals(text) ) {
+                    		sendEvent(currentPosition + "|" + text + "|" + Direction.DOWN.toString());
+                    		sendEvent(currentPosition + "|" + text + "|" + Direction.LEFT.toString());
                     		
                     	} else {
                     		//Everything else send the event we constructed
