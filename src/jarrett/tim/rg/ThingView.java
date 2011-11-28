@@ -185,7 +185,7 @@ abstract public class ThingView extends ImageView
             
             //Do the check again. This time, we expect null to happen from time-to-time, just ignore it
             if ( pkg == null ) {
-            	Log.d("Tim", "Current State: " + this.state.toString() + "; Current Event: " + em.getEvent().toString());
+            	Log.d("Tim", "Current State: " + this.state.toString() + "; Current Event: " + em.getEvent().toString()); 
                 setEmits(null);
                 return;
                 
