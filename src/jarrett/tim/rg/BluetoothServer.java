@@ -199,7 +199,7 @@ public class BluetoothServer
         }
         
         //Still here? Then bluetooth is G2G
-        if ( !isServerRunning() ) {
+        if ( bluetoothAdapter.isEnabled() && !isServerRunning() ) {
             startServer();
         }
         

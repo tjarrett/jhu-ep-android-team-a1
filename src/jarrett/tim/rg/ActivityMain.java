@@ -187,7 +187,7 @@ public class ActivityMain extends Activity
                                         //This Rube Goldberg Protocol needs some work...
                                         
                                         //todo: remove the next line...
-                                        finalMsg = finalMsg + "[";
+                                        //finalMsg = finalMsg + "[";
                                         
                                         Log.d(RgTools.SERVER, "Thing fired off this: " + finalMsg);
                                         
@@ -590,7 +590,8 @@ public class ActivityMain extends Activity
     			
     		    //Otherwise it was enabled so start the BluetoothServer
     			} else {
-    	            if ( bluetoothMode && !bts.isServerRunning() ) {
+    			    bluetoothMode = true;
+    	            if ( !bts.isServerRunning() ) {
     	                bts.startServer();
     	                
     	            }
