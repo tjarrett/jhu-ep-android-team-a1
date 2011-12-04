@@ -1,7 +1,6 @@
 package jarrett.tim.rg;
 
-import java.util.LinkedList;
-import java.util.List;
+import com.javadude.rube.protocol.Event;
 
 import android.content.Context;
 

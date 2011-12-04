@@ -1,5 +1,7 @@
 package jarrett.tim.rg;
 
+import com.javadude.rube.protocol.Direction;
+
 import android.content.Context;
 
 /**

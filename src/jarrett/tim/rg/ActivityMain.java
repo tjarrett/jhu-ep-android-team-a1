@@ -6,6 +6,8 @@ import java.net.UnknownHostException;
 import java.util.*;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.javadude.rube.protocol.Direction;
+import com.javadude.rube.protocol.Event;
 import com.javadude.rube.protocol.EventCarrier;
 import com.javadude.rube.protocol.Reporter;
 import com.javadude.rube.protocol.SocketHandler;
@@ -18,8 +20,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -446,7 +446,9 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
     	int x = Integer.parseInt(locationSplit[0]);
     	int y = Integer.parseInt(locationSplit[1]);
 
-    	EventCarrier eventCarrier = new EventCarrier(Event.valueOf(eventString), x, y, 0, direction);
+    	com.javadude.rube.protocol.Event event = Event.valueOf(eventString);
+    	EventCarrier eventCarrier = new EventCarrier(event, x, y, 0, direction);
+//    	EventCarrier eventCarrier = new EventCarrier(Event.valueOf(eventString), x, y, 0, direction);
     	if ( wifiMode ) {
     		socketHandler.send(eventCarrier); 
         } else {
@@ -465,21 +467,21 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
              * This device does not support bluetooth... fall back to local mode for testing purposes...
              * This is really just for the emulator...
              */
-            case BluetoothServer.DIALOG_NO_BLUETOOTH:
-                wifiMode = false;
-                return create("Your device does not appear to support wifi. Falling back to local only mode.", false);
-
-            case BluetoothServer.DIALOG_WE_HAVE_BLUETOOTH:
-                return create("We have bluetooth! Yippie!", false);
-
-            case BluetoothServer.DIALOG_BLUETOOTH_ENABLED:
-                return create("Bluetooth was enabled", false);
-
-            case BluetoothServer.DIALOG_BLUETOOTH_ALREADY_ENABLED:
-                return create("Bluetooth was already enabled", false);
-
-            case BluetoothServer.DIALOG_USER_IS_EVIL:
-                return create("You MUST enable wifi for this application to work!", true);
+//            case BluetoothServer.DIALOG_NO_BLUETOOTH:
+//                wifiMode = false;
+//                return create("Your device does not appear to support wifi. Falling back to local only mode.", false);
+//
+//            case BluetoothServer.DIALOG_WE_HAVE_BLUETOOTH:
+//                return create("We have bluetooth! Yippie!", false);
+//
+//            case BluetoothServer.DIALOG_BLUETOOTH_ENABLED:
+//                return create("Bluetooth was enabled", false);
+//
+//            case BluetoothServer.DIALOG_BLUETOOTH_ALREADY_ENABLED:
+//                return create("Bluetooth was already enabled", false);
+//
+//            case BluetoothServer.DIALOG_USER_IS_EVIL:
+//                return create("You MUST enable wifi for this application to work!", true);
 
         }// end switch
 

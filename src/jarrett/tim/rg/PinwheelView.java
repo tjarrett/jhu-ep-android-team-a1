@@ -1,5 +1,7 @@
 package jarrett.tim.rg;
 
+import com.javadude.rube.protocol.Event;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.view.animation.Animation;

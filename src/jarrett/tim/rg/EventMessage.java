@@ -1,5 +1,8 @@
 package jarrett.tim.rg;
 
+import com.javadude.rube.protocol.Direction;
+import com.javadude.rube.protocol.Event;
+
 import android.util.Log;
 
 /**
