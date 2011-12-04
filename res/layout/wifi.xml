@@ -30,7 +30,7 @@
                 android:id="@+id/ip_address"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/enter_ip_address_text" />
+                android:text="@string/ip_address" />
         </TableRow>
 
         <TableRow

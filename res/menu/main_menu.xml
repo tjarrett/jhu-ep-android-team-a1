@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/wifi_settings" android:title="@string/wifi_settings"></item>
 	<item android:id="@+id/qr_scanning" android:title="@string/qr_scan"></item>
 </menu>

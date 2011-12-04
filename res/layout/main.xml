@@ -3,33 +3,36 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-            
-    <LinearLayout 
+
+    <LinearLayout
         android:id="@+id/button_holder"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >        
-
+        android:orientation="vertical" >
     </LinearLayout>
-    
+
     <Spinner
         android:id="@+id/gadget_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:prompt="@string/gadget_spinner_prompt" />
-    
+
     <TextView
-        android:id="@+id/current_state" 
+        android:id="@+id/current_state"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
     
+    <TextView
+        android:id="@+id/ip_address"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/ip_address" />
+
     <FrameLayout
-        android:id="@+id/frame" 
-        android:layout_width="fill_parent" 
-        android:layout_height="fill_parent" 
-        android:background="#FFFFFF"
-        >
-        
+        android:id="@+id/frame"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="#FFFFFF" >
     </FrameLayout>
 
 </LinearLayout>

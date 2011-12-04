@@ -14,10 +14,7 @@ import com.javadude.rube.protocol.SocketHandler;
 import com.javadude.rube.protocol.SocketHandlerHolder;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,14 +42,6 @@ import android.widget.TextView;
  */
 public class ActivityMain extends Activity implements Reporter,SocketHandlerHolder
 {	
-	
-	/**
-	 * If this is set to true, will try to send button press events via wifi otherwise 
-	 * keeps the events local -- mostly for testing purposes in an emulator only. Leave this 
-	 * as true as it will get flipped to false if no wifi is detected (and a message will 
-	 * be displayed)
-	 */
-	private boolean wifiMode = true;
 
 	/**
      * The list of ThingViews mapped by the values in the spinner
@@ -93,22 +82,6 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
         
         //As per Prof. Stanchfield...
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        
-//        //Connect to socket server via ip address defined in ip address textview
-//        if ( wifiMode ) {
-//        	TextView ipAddress = (TextView)findViewById(R.id.ip_address);
-//        	Log.d(RgTools.DEBUG, "retrieved ip address: " + ipAddress);
-//			Socket socket = null;
-//			try {
-//				socket = new Socket(ipAddress.getText().toString(), 4242);
-//			} catch (UnknownHostException e) {
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//            socketHandler = new GadgetSocketHandler(this, socket);
-//            socketHandler.start();
-//        }
 
         // Populate our maps based on the gadgets_array
         // -- to add more gadget create an entry in the gadgets_array and create
@@ -158,9 +131,9 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
                                         
                                         Log.d(RgTools.SERVER, "Thing fired off this: " + finalMsg);
                                         
-                                        if ( wifiMode ) {
+                                        if ( RgTools.wifiMode ) {
                                             //Send the message
-                                            //sendEvent(finalMsg);
+//                                            sendEvent(finalMsg);
                                             
                                         }
                                         
@@ -368,6 +341,22 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
 
         });
 
+//        //Connect to socket server via ip address defined in ip address textview
+//        if ( RgTools.wifiMode ) {
+//        	TextView ipAddress = (TextView)findViewById(R.id.ip_address);
+//        	Log.d(RgTools.DEBUG, "retrieved ip address: " + ipAddress.getText());
+//			Socket socket = null;
+//			try {
+//				socket = new Socket(ipAddress.getText().toString(), 4242);
+//			} catch (UnknownHostException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//            socketHandler = new GadgetSocketHandler(this, socket);
+//            socketHandler.start();
+//        }
+        
         // Get the frame view
         frame = (FrameLayout)findViewById(R.id.frame);
 
@@ -447,7 +436,7 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
     	int y = Integer.parseInt(locationSplit[1]);
 
     	EventCarrier eventCarrier = new EventCarrier(Event.valueOf(eventString), x, y, 0, direction);
-    	if ( wifiMode ) {
+    	if ( RgTools.wifiMode ) {
     		socketHandler.send(eventCarrier); 
         } else {
             applyEventToCurrentThing(eventString);
@@ -456,58 +445,6 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
         
     }//end sendEvent
     
-    /** called when the framework needs to create a dialog */
-    @Override
-    protected Dialog onCreateDialog(int id, Bundle args)
-    {
-        switch ( id ) {
-            /**
-             * This device does not support bluetooth... fall back to local mode for testing purposes...
-             * This is really just for the emulator...
-             */
-//            case BluetoothServer.DIALOG_NO_BLUETOOTH:
-//                wifiMode = false;
-//                return create("Your device does not appear to support wifi. Falling back to local only mode.", false);
-//
-//            case BluetoothServer.DIALOG_WE_HAVE_BLUETOOTH:
-//                return create("We have bluetooth! Yippie!", false);
-//
-//            case BluetoothServer.DIALOG_BLUETOOTH_ENABLED:
-//                return create("Bluetooth was enabled", false);
-//
-//            case BluetoothServer.DIALOG_BLUETOOTH_ALREADY_ENABLED:
-//                return create("Bluetooth was already enabled", false);
-//
-//            case BluetoothServer.DIALOG_USER_IS_EVIL:
-//                return create("You MUST enable wifi for this application to work!", true);
-
-        }// end switch
-
-        return super.onCreateDialog(id, args);
-
-    }// end onCreateDialog
-
-    /**
-     * our dialog creation helper method. quitAfter=true will cause the dialog
-     * to finish() this activity
-     */
-    private Dialog create(String message, final boolean quitAfter)
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        return builder.setMessage(message).setPositiveButton("Ok", new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                dialog.cancel();
-                if ( quitAfter ) {
-                    finish();
-
-                }
-            }
-
-        }).create();
-    }
 
     /** set up our menu */
     @Override
@@ -524,11 +461,6 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
     public boolean onMenuItemSelected(int featureId, MenuItem item)
     {
 		switch (item.getItemId()) {
-		case R.id.wifi_settings:
-
-			startActivityForResult(new Intent(this, ActivityWifi.class), ActivityWifi.SERVER_CONNECTION);
-
-			return true;
 		case R.id.qr_scanning:
 			Log.d(RgTools.QR_SCANNER, "Initiating QR Scan");
 			IntentIntegrator integrator = new IntentIntegrator(this);

@@ -17,6 +17,15 @@ public class RgTools {
 	public static final String BLUETOOTH_SERVER = "Group-A1-Bluetooth-Server";
 	
 	public static final String QR_SCANNER = "Group-A1-QR-Scanner";
+
+	
+	/**
+	 * If this is set to true, will try to send button press events via wifi otherwise 
+	 * keeps the events local -- mostly for testing purposes in an emulator only. Leave this 
+	 * as true as it will get flipped to false if no wifi is detected (and a message will 
+	 * be displayed)
+	 */
+	public static final boolean wifiMode = true;
 	
 	public static void createNotification(Context context, String ntf_title, String ntf_text, int icon) {
 		String ns = Context.NOTIFICATION_SERVICE;
