@@ -4,12 +4,11 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <LinearLayout
-        android:id="@+id/button_holder"
-        android:layout_width="fill_parent"
+    <Spinner
+        android:id="@+id/event_spinner"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
-    </LinearLayout>
+        android:prompt="@string/event_spinner_prompt" />
 
     <Spinner
         android:id="@+id/gadget_spinner"
@@ -18,11 +17,16 @@
         android:prompt="@string/gadget_spinner_prompt" />
 
     <TextView
+        android:id="@+id/current_position"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
         android:id="@+id/current_state"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
-    
-    <EditView
+
+    <EditText
         android:id="@+id/ip_address"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

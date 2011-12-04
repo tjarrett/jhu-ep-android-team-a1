@@ -41,432 +41,389 @@ import android.widget.TextView;
  * @author tjarrett
  * 
  */
-public class ActivityMain extends Activity implements Reporter,SocketHandlerHolder
-{	
+public class ActivityMain extends Activity implements Reporter,
+		SocketHandlerHolder {
 
 	/**
-     * The list of ThingViews mapped by the values in the spinner
-     */
-    private Map<String, ThingView> thingView = new HashMap<String, ThingView>();
+	 * The list of ThingViews mapped by the values in the spinner
+	 */
+	private Map<String, ThingView> thingView = new HashMap<String, ThingView>();
 
-    /**
-     * Our FrameLayout
-     */
-    private FrameLayout frame;
+	/**
+	 * Our FrameLayout
+	 */
+	private FrameLayout frame;
 
-    /**
-     * The currently select ThingView
-     */
-    private ThingView currentThing;
+	/**
+	 * The currently select ThingView
+	 */
+	private ThingView currentThing;
 
-    /**
-     * The TextView that shows the current state
-     */
-    private TextView currentState;
-    
-    /**
-     * The currentPosition within the grid. Defaults to unknown (maybe we should default to 0,0?)
-     */
-    private String currentPosition = "unknown";
-    
-    /**
-     * The socketHander for network connectivity
-     */
-    private SocketHandler socketHandler;
+	/**
+	 * The TextView that shows the current state
+	 */
+	private TextView currentState;
 
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        
-        //As per Prof. Stanchfield...
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+	/**
+	 * The currentPosition within the grid. Defaults to unknown (maybe we should
+	 * default to 0,0?)
+	 */
+	private String currentPosition = "unknown";
 
-        // Populate our maps based on the gadgets_array
-        // -- to add more gadget create an entry in the gadgets_array and create
-        // a class that descends from
-        // ThingView with the same name but append "View" (e.g. Monkey =>
-        // MonkeyView)
-        String[] things = getResources().getStringArray(R.array.gadgets_array);
-        for ( String thingName : things ) {
-            //Figure out the fully qualified class name for this thing
-            String className = this.getClass().getPackage().getName() + "." + thingName.replace(" ", "") + "View";
+	/**
+	 * The socketHander for network connectivity
+	 */
+	private SocketHandler socketHandler;
 
-            try {
-                //Create a new instance of this particular thing
-                ThingView view = (ThingView)Class.forName(className).getConstructor(new Class[] { Context.class }).newInstance(this);
-                
-                //Add a state change listener that will be called when the state changes
-                view.addStateChangeListener(new StateChangeListener()
-                {
-                    /**
-                     * This will be called when state changes
-                     */
-                    @Override
-                    public void onStateChanged(ThingView view)
-                    {
-                        //Since state changes can technically happen on a thing that is not currently displayed, make sure 
-                        //that the currentThing and the view given match
-                        if ( view == currentThing ) {
-                            //Update the state message
-                            updateCurrentStateMessage();
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);
 
-                            //Figure out if this state change caused more events to be fired... 
-                            if ( view.getEmits() != null ) {
-                                //It's not null, but that doesn't mean anything, could be an empty list...
-                                List<String> emits = view.getEmits();
-                                
-                                if ( emits.size() > 0 ) {
-                                    //List wasn't empty so loop through sending each message to the remote server
-                                    for ( String msg : emits ) {
-                                        //Build the message
-                                        String finalMsg = currentPosition + "|" + msg;
-                                        
-                                        //Mangle this message so the other server knows it's a response and not a command...
-                                        //This Rube Goldberg Protocol needs some work...
-                                        
-                                        //todo: remove the next line...
-                                        //finalMsg = finalMsg + "[";
-                                        
-                                        Log.d(RgTools.SERVER, "Thing fired off this: " + finalMsg);
-                                        
-                                        if ( RgTools.wifiMode ) {
-                                            //Send the message
-//                                            sendEvent(finalMsg);
-                                            
-                                        }
-                                        
-                                    }//end for
-                                    
-                                }
+		// As per Prof. Stanchfield...
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-                            }
+		// Populate our maps based on the gadgets_array
+		// -- to add more gadget create an entry in the gadgets_array and create
+		// a class that descends from
+		// ThingView with the same name but append "View" (e.g. Monkey =>
+		// MonkeyView)
+		String[] things = getResources().getStringArray(R.array.gadgets_array);
+		for (String thingName : things) {
+			// Figure out the fully qualified class name for this thing
+			String className = this.getClass().getPackage().getName() + "."
+					+ thingName.replace(" ", "") + "View";
 
-                        }
-
-                    }//end onStateChanged
-
-                });
-
-                //Add this thing view to the list
-                thingView.put(thingName, view);
-
-            } catch ( Exception e ) {
-                // Replace this with a complaint about the class not being found
-                throw new RuntimeException(e);
-                
-            }
-
-        }// end for
-
-        // Go get our button holder
-        LinearLayout buttonHolder = (LinearLayout)findViewById(R.id.button_holder);
-
-        // Put a horizontal linear layout inside of it
-        LinearLayout horizButtonHolder = new LinearLayout(getBaseContext());
-
-        // Copy the settings from the parent button holder
-        horizButtonHolder.setLayoutParams(buttonHolder.getLayoutParams());
-
-        // Make it horizontal
-        horizButtonHolder.setOrientation(LinearLayout.HORIZONTAL);
-
-        // Add it to the parent
-        buttonHolder.addView(horizButtonHolder);
-
-        // Point to it as the current holder
-        LinearLayout currentButtonHolder = horizButtonHolder;
-
-        // Keep track of how many buttons we've put out
-        int counter = 0;
-
-        // Sort the buttons alphabetically
-        List<String> eventButtons = new ArrayList<String>(Event.values().length);
-        for ( Event event : Event.values() ) {
-            eventButtons.add(event.toString());
-
-        }
-
-        // Now build out the buttons
-        for ( String event : eventButtons ) {
-            // If this is the 5th button in this row
-            if ( counter >= 5 ) {
-                // Create a new linearlayout
-                horizButtonHolder = new LinearLayout(getBaseContext());
-
-                // Copy the layout params
-                horizButtonHolder.setLayoutParams(buttonHolder.getLayoutParams());
-
-                // Make it horizontal
-                horizButtonHolder.setOrientation(LinearLayout.HORIZONTAL);
-
-                // Add it
-                buttonHolder.addView(horizButtonHolder);
-
-                // Set it as the current one
-                currentButtonHolder = horizButtonHolder;
-
-                // Reset the counter
-                counter = 0;
-
-            }
-
-            // Inflate our button
-            Button btn = (Button)LayoutInflater.from(getBaseContext()).inflate(R.layout.button, null);
-
-            // Set the string on the button
-            btn.setText(event);
-
-            /**
-             * Set an onclicklistener for each button as it goes by
-             */
-            btn.setOnClickListener(new OnClickListener()
-            {
-                /**
-                 * Handle a button being clicked
-                 */
-                @Override
-                public void onClick(View btnClicked)
-                {
-                    //Get the text of the button
-                    String text = ((Button)(btnClicked)).getText().toString();
-                    
-                    //Start building our event
-                    String event = currentPosition + "|" + text;
-                    
-                    //Default direction is ALL which is what the homework says to do... but 
-                    //I think this is going to be a problem since we are now supposed to send 
-                    //Right, Left, Up, Down, etc
-                    String direction = "ALL";
-                    Direction directionObject = Direction.ALL;
-
-                    if ( "Heat".equals(text) ) {
-                        direction = "UP";
-                        directionObject = Direction.UP;
-                        
-                    } else if ( "Water".equals(text) ) {
-                        direction = "DOWN";
-                        directionObject = Direction.DOWN;
-                        
-                    } else if ( "Reset".equals(text) || "Register".equals(text) ) {
-                        direction = null;
-                    } 
-
-                    //Append direction if it makes sense
-                    if ( direction != null ) {
-                        event += "|" + direction;
-                    }
-                    
-                    //If the button pressed is "Start", keep it local...
-                    if ( "Start".equals(text) ) {
-                        //Start always stays local
-                        applyEventToCurrentThing(event);
-                        
-                    } else {
-                    	//Send out the event -- maybe even over bluetooth
-                    	
-                    	//If it's ElectricOn, send both Up and Right
-                    	if ( "ElectricOn".equals(text) ) {
-                    		sendEvent(currentPosition, text, Direction.UP);
-                    		sendEvent(currentPosition, text, Direction.RIGHT);
-                    		
-                        //If it's ElectricOff, send Down and left
-                    	} else if ( "ElectricOff".equals(text) ) {
-                    		sendEvent(currentPosition, text, Direction.DOWN);
-                    		sendEvent(currentPosition, text, Direction.LEFT);       
-                    		sendEvent(currentPosition, text, Direction.RIGHT);
-                    		
-                    	} else if ( "Pull".equals(text) ) {
-                    		sendEvent(currentPosition, text, Direction.UP);
-                    		sendEvent(currentPosition, text, Direction.RIGHT);
-                    		sendEvent(currentPosition, text, Direction.LEFT);
-                    		
-                    	} else if ( "Release".equals(text) ) {
-                    		sendEvent(currentPosition, text, Direction.DOWN);
-                    		sendEvent(currentPosition, text, Direction.LEFT);
-                    		
-                    	} else {
-                    		//Everything else send the event we constructed
-                    		sendEvent(currentPosition, text, directionObject);
-                    	}
-                    	
-                    }
-
-                }// end onClick
-
-            });
-
-            // Add it to this button holder
-            currentButtonHolder.addView(btn);
-
-            // Bump up our count
-            counter++;
-
-        }// end for
-
-        // Fill out our gadget spinner...
-        // Derived from spinner example at:
-        // http://developer.android.com/resources/tutorials/views/hello-spinner.html
-        Spinner gadgetSpinner = (Spinner)findViewById(R.id.gadget_spinner);
-
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.gadgets_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        gadgetSpinner.setAdapter(adapter);
-
-        currentState = (TextView)findViewById(R.id.current_state);
-
-        // Listen for spinner changes...
-        gadgetSpinner.setOnItemSelectedListener(new OnItemSelectedListener()
-        {
-            /**
-             * Called when an item is selected
-             */
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id)
-            {
-                ThingView tmpThingView = thingView.get(parent.getItemAtPosition(pos).toString());
-                setDisplayedImage(tmpThingView);
-
-            }//end onItemSelected
-
-            /**
-             * Called when nothing is selected
-             */
-            @Override
-            public void onNothingSelected(AdapterView<?> parent)
-            {
-                // Just swallow it
-            }//end onNothingSelected
-
-        });
-
-        
-        //Connect to socket server via ip address defined in ip address textview
-        if ( RgTools.wifiMode ) {
-        	EditText ipAddress = (EditText)findViewById(R.id.ip_address);
-        	Log.d(RgTools.DEBUG, "retrieved ip address: " + ipAddress.getText());
-			Socket socket = null;
 			try {
-				socket = new Socket(ipAddress.getText().toString(), 4242);
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
+				// Create a new instance of this particular thing
+				ThingView view = (ThingView) Class.forName(className)
+						.getConstructor(new Class[] { Context.class })
+						.newInstance(this);
+
+				// Add a state change listener that will be called when the
+				// state changes
+				view.addStateChangeListener(new StateChangeListener() {
+					/**
+					 * This will be called when state changes
+					 */
+					@Override
+					public void onStateChanged(ThingView view) {
+						// Since state changes can technically happen on a thing
+						// that is not currently displayed, make sure
+						// that the currentThing and the view given match
+						if (view == currentThing) {
+							// Update the state message
+							updateCurrentStateMessage();
+
+							// Figure out if this state change caused more
+							// events to be fired...
+							if (view.getEmits() != null) {
+								// It's not null, but that doesn't mean
+								// anything, could be an empty list...
+								List<String> emits = view.getEmits();
+
+								if (emits.size() > 0) {
+									// List wasn't empty so loop through sending
+									// each message to the remote server
+									for (String msg : emits) {
+										// Build the message
+										String finalMsg = currentPosition + "|"
+												+ msg;
+
+										// Mangle this message so the other
+										// server knows it's a response and not
+										// a command...
+										// This Rube Goldberg Protocol needs
+										// some work...
+
+										// todo: remove the next line...
+										// finalMsg = finalMsg + "[";
+
+										Log.d(RgTools.SERVER,
+												"Thing fired off this: "
+														+ finalMsg);
+
+										if (RgTools.wifiMode) {
+											// Send the message
+											// sendEvent(finalMsg);
+
+										}
+
+									}// end for
+
+								}
+
+							}
+
+						}
+
+					}// end onStateChanged
+
+				});
+
+				// Add this thing view to the list
+				thingView.put(thingName, view);
+
+			} catch (Exception e) {
+				// Replace this with a complaint about the class not being found
+				throw new RuntimeException(e);
+
 			}
-            socketHandler = new GadgetSocketHandler(this, socket);
-            socketHandler.start();
-        }
-        
-        // Get the frame view
-        frame = (FrameLayout)findViewById(R.id.frame);
 
-    }// end onCreate
+		}// end for
 
-    /**
-     * Called just before the activity is destroyed
-     */
-    @Override protected void onDestroy() 
-    {
-        //unregister any of our broadcast receivers
-        socketHandler.close();
-        super.onDestroy();
-        
-    }//end onDestroy
+		// Fill out our event and gadget spinners...
+		// Derived from spinner example at:
+		// http://developer.android.com/resources/tutorials/views/hello-spinner.html
+		Spinner eventSpinner = (Spinner) findViewById(R.id.event_spinner);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+				this, R.array.events_array,
+				android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		eventSpinner.setAdapter(adapter);
 
-    /**
-     * Update the image that is being displayed...
-     * 
-     * @param thingView
-     */
-    private void setDisplayedImage(ThingView thingView)
-    {
-        // Remove the current thing view, if any
-        if ( currentThing != null ) {
-            frame.removeAllViews();
+		// Listen for spinner changes...
+		eventSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			/**
+			 * Called when an item is selected
+			 */
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int pos, long id) {
+				if (pos != 0) {
+					String text = parent.getItemAtPosition(pos).toString();
 
-        }
+					// Start building our event
+					String event = currentPosition + "|" + text;
 
-        currentThing = thingView;
-        frame.addView(thingView);
+					// Default direction is ALL which is what the homework says
+					// to do... but
+					// I think this is going to be a problem since we are now
+					// supposed to send
+					// Right, Left, Up, Down, etc
+					String direction = "ALL";
+					Direction directionObject = Direction.ALL;
 
-        // Display the current state
-        updateCurrentStateMessage();
+					if ("Heat".equals(text)) {
+						direction = "UP";
+						directionObject = Direction.UP;
 
-    }// end setDisplayedImage
+					} else if ("Water".equals(text)) {
+						direction = "DOWN";
+						directionObject = Direction.DOWN;
 
-    /**
-     * Try to apply the given Event to whatever the currently selected thing is
-     * 
-     * @param e
-     */
-    private void applyEventToCurrentThing(String e)
-    {
-        // If we don't have a thing, bail out -- this shouldn't be possible
-        if ( currentThing == null ) {
-            return;
+					} else if ("Reset".equals(text) || "Register".equals(text)) {
+						direction = null;
+					}
 
-        }
+					// Append direction if it makes sense
+					if (direction != null) {
+						event += "|" + direction;
+					}
 
-        // Pass the event to the thing
-        currentThing.receiveEvent(e);
+					// If the button pressed is "Start", keep it local...
+					if ("Start".equals(text)) {
+						// Start always stays local
+						applyEventToCurrentThing(event);
 
-        // Update the displayed message
-        updateCurrentStateMessage();
+					} else {
+						// Send out the event -- maybe even over bluetooth
 
-    }// end applyEventToCurrentThing
+						// If it's ElectricOn, send both Up and Right
+						if ("ElectricOn".equals(text)) {
+							sendEvent(currentPosition, text, Direction.UP);
+							sendEvent(currentPosition, text, Direction.RIGHT);
 
-    /**
-     * Checks with the currently selected thing and displays it's tate
-     */
-    public void updateCurrentStateMessage()
-    {
-        currentState.setText("Current State: " + currentThing.getState().toString());
+							// If it's ElectricOff, send Down and left
+						} else if ("ElectricOff".equals(text)) {
+							sendEvent(currentPosition, text, Direction.DOWN);
+							sendEvent(currentPosition, text, Direction.LEFT);
+							sendEvent(currentPosition, text, Direction.RIGHT);
 
-    }// end updateCurrentStateMessage
-    
-    /**
-     * Send the given event to the widget (either over network or locally)
-     * @param event
-     */
-    private void sendEvent(String location, String eventString, Direction direction)
-    {
-    	int x = 0;
-    	int y = 0;
-    	RgTools.createNotification(getApplicationContext(), "Sending Event", eventString, android.R.drawable.ic_menu_share);
-    	
-    	if (!location.equalsIgnoreCase("Unknown")) {
-    		String[] locationSplit = location.split(",");
-    		x = Integer.parseInt(locationSplit[0]);
-    		y = Integer.parseInt(locationSplit[1]);
-    	}
-    	
-    	EventCarrier eventCarrier = new EventCarrier(Event.valueOf(eventString), x, y, 0, direction);
-    	if ( RgTools.wifiMode ) {
-    		socketHandler.send(eventCarrier); 
-        } else {
-            applyEventToCurrentThing(eventString);
-            
-        }
-        
-    }//end sendEvent
-    
+						} else if ("Pull".equals(text)) {
+							sendEvent(currentPosition, text, Direction.UP);
+							sendEvent(currentPosition, text, Direction.RIGHT);
+							sendEvent(currentPosition, text, Direction.LEFT);
 
-    /** set up our menu */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        MenuInflater inflater = new MenuInflater(this);
-        inflater.inflate(R.menu.main_menu, menu);
-        return true;
+						} else if ("Release".equals(text)) {
+							sendEvent(currentPosition, text, Direction.DOWN);
+							sendEvent(currentPosition, text, Direction.LEFT);
 
-    }//end onCreateOptionsMenu
+						} else {
+							// Everything else send the event we constructed
+							sendEvent(currentPosition, text, directionObject);
+						}
 
-    /** handle menu selection to turn the server on and off */
-    @Override
-    public boolean onMenuItemSelected(int featureId, MenuItem item)
-    {
+					}
+				}
+				else {
+					Log.d(RgTools.DEBUG, "Selected the 0th position in spinner.");
+				}
+				
+				//reset to 'Select Event'
+				parent.setSelection(0);
+
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+				//Do nothing
+			}// end onClick
+
+		});
+
+		Spinner gadgetSpinner = (Spinner) findViewById(R.id.gadget_spinner);
+		adapter = ArrayAdapter.createFromResource(this, R.array.gadgets_array,
+				android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		gadgetSpinner.setAdapter(adapter);
+
+		// Listen for spinner changes...
+		gadgetSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			/**
+			 * Called when an item is selected
+			 */
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int pos, long id) {
+				ThingView tmpThingView = thingView.get(parent
+						.getItemAtPosition(pos).toString());
+				setDisplayedImage(tmpThingView);
+
+			}// end onItemSelected
+
+			/**
+			 * Called when nothing is selected
+			 */
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+				// Just swallow it
+			}// end onNothingSelected
+
+		});
+
+		updateCurrentPositionView();
+
+		currentState = (TextView) findViewById(R.id.current_state);
+
+		// Get the frame view
+		frame = (FrameLayout) findViewById(R.id.frame);
+
+	}// end onCreate
+
+	/**
+	 * Called just before the activity is destroyed
+	 */
+	@Override
+	protected void onDestroy() {
+		// unregister any of our broadcast receivers
+		socketHandler.close();
+		super.onDestroy();
+
+	}// end onDestroy
+
+	/**
+	 * Update the image that is being displayed...
+	 * 
+	 * @param thingView
+	 */
+	private void setDisplayedImage(ThingView thingView) {
+		// Remove the current thing view, if any
+		if (currentThing != null) {
+			frame.removeAllViews();
+
+		}
+
+		currentThing = thingView;
+		frame.addView(thingView);
+
+		// Display the current state
+		updateCurrentStateMessage();
+
+	}// end setDisplayedImage
+
+	/**
+	 * Try to apply the given Event to whatever the currently selected thing is
+	 * 
+	 * @param e
+	 */
+	private void applyEventToCurrentThing(String e) {
+		// If we don't have a thing, bail out -- this shouldn't be possible
+		if (currentThing == null) {
+			Log.e(RgTools.SERVER,
+					"Current Thing Not Selected. Something is very wrong.");
+			return;
+
+		}
+
+		// Pass the event to the thing
+		currentThing.receiveEvent(e);
+
+		// Update the displayed message
+		updateCurrentStateMessage();
+
+	}// end applyEventToCurrentThing
+
+	/**
+	 * Checks the current position thing and displays it
+	 */
+	private void updateCurrentPositionView() {
+		((TextView) findViewById(R.id.current_position))
+				.setText("Current Grid Position: " + currentPosition);
+	}
+
+	/**
+	 * Checks with the currently selected thing and displays it's state
+	 */
+	public void updateCurrentStateMessage() {
+		currentState.setText("Current State: "
+				+ currentThing.getState().toString());
+
+	}// end updateCurrentStateMessage
+
+	/**
+	 * Send the given event to the widget (either over network or locally)
+	 * 
+	 * @param event
+	 */
+	private void sendEvent(String location, String eventString,
+			Direction direction) {
+		RgTools.createNotification(getApplicationContext(), "Sending Event",
+				eventString, android.R.drawable.ic_menu_share);
+
+		if (!location.equals("unknown")) {
+			String[] locationSplit = location.split(",");
+			int x = Integer.parseInt(locationSplit[0]);
+			int y = Integer.parseInt(locationSplit[1]);
+
+			EventCarrier eventCarrier = new EventCarrier(
+					Event.valueOf(eventString), x, y, 0, direction);
+			if (RgTools.wifiMode && socketHandler != null) {
+				socketHandler.send(eventCarrier);
+			} else {
+				applyEventToCurrentThing(x + "," + y + "|" + eventString
+						+ "|" + Direction.NULL);
+
+			}
+		} else {
+			applyEventToCurrentThing(location + "|" + eventString + "|" + Direction.NULL);
+		}
+
+	}// end sendEvent
+
+	/** set up our menu */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = new MenuInflater(this);
+		inflater.inflate(R.menu.main_menu, menu);
+		return true;
+
+	}// end onCreateOptionsMenu
+
+	/** handle menu selection to turn the server on and off */
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.qr_scanning:
 			Log.d(RgTools.QR_SCANNER, "Initiating QR Scan");
@@ -476,84 +433,87 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
 					+ integrator.getMessage());
 			break;
 
-        }//end switch
-        
-        return super.onMenuItemSelected(featureId, item);
-        
-    }//end onMenuItemSelected
+		}// end switch
 
-    /** handle results from startActivityForResult() calls */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-		switch ( requestCode ) {
-    	    /* Handle QR code stuff */
-    		case IntentIntegrator.REQUEST_CODE:
-    			IntentResult scanResult = IntentIntegrator.parseActivityResult(
-    					requestCode, resultCode, data);
-    			if ( scanResult != null ) {
-    				String ntf_title = "RG Location Set";
-    				String ntf_text = "Scan Position Returned: " + scanResult.getContents();
-    				
-    				RgTools.createNotification(getApplicationContext(), ntf_title, ntf_text, android.R.drawable.ic_menu_mylocation);
-    				
-    				Log.d(RgTools.QR_SCANNER, "Scan Position Returned: " + scanResult.getContents());
-    				currentPosition = scanResult.getContents();
-    				
-    			}
-    			break;
-    			
-		}//end switch
-		
-        super.onActivityResult(requestCode, resultCode, data);
-        
-    }//end onActivityResult
+		return super.onMenuItemSelected(featureId, item);
 
-    /**
-     * Take the contents of the EventCarrier 
-     * and perform the event against your state machine
-     * @param eventCarrier
-     */
+	}// end onMenuItemSelected
+
+	/** handle results from startActivityForResult() calls */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		/* Handle QR code stuff */
+		case IntentIntegrator.REQUEST_CODE:
+			IntentResult scanResult = IntentIntegrator.parseActivityResult(
+					requestCode, resultCode, data);
+			if (scanResult != null) {
+				String ntf_title = "RG Location Set";
+				String ntf_text = "Scan Position Returned: "
+						+ scanResult.getContents();
+
+				RgTools.createNotification(getApplicationContext(), ntf_title,
+						ntf_text, android.R.drawable.ic_menu_mylocation);
+
+				Log.d(RgTools.QR_SCANNER, "Scan Position Returned: "
+						+ scanResult.getContents());
+				currentPosition = scanResult.getContents();
+				updateCurrentPositionView();
+			}
+			break;
+
+		}// end switch
+
+		super.onActivityResult(requestCode, resultCode, data);
+
+	}// end onActivityResult
+
+	/**
+	 * Take the contents of the EventCarrier and perform the event against your
+	 * state machine
+	 * 
+	 * @param eventCarrier
+	 */
 	public void sendToHandler(EventCarrier eventCarrier) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	/**
 	 * 
 	 * @param socketHandler
 	 */
-    @Override 
-    public void addSocketHandler(SocketHandler socketHandler) {
-        this.socketHandler = socketHandler;
-    }
-    
-    /**
-     * 
-     * @param socketHandler
-     */
-    @Override
-    public void removeSocketHandler(SocketHandler socketHandler) {
-        this.socketHandler = null;
-    }
-    
-    /**
-     * 
-     * @param message
-     * @param t
-     */
-    @Override 
-    public void report(String message, Throwable t) {
-        Log.d("Rube",message,t);
-    }
-    
-    /**
-     * 
-     * @param line
-     */
-    @Override 
-    public void report(String line) {
-        Log.d("Rube",line);
-    }
+	@Override
+	public void addSocketHandler(SocketHandler socketHandler) {
+		this.socketHandler = socketHandler;
+	}
+
+	/**
+	 * 
+	 * @param socketHandler
+	 */
+	@Override
+	public void removeSocketHandler(SocketHandler socketHandler) {
+		this.socketHandler = null;
+	}
+
+	/**
+	 * 
+	 * @param message
+	 * @param t
+	 */
+	@Override
+	public void report(String message, Throwable t) {
+		Log.d("Rube", message, t);
+	}
+
+	/**
+	 * 
+	 * @param line
+	 */
+	@Override
+	public void report(String line) {
+		Log.d("Rube", line);
+	}
 
 }// end ActivityMain

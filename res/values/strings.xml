@@ -9,6 +9,25 @@
     <string name="Steam">Steam</string>
     <string name="Alex">Alex</string>
     
+        
+    <string-array name="events_array">
+        <item>Select Event</item>
+        <item>Register</item>
+        <item>Heat</item>
+        <item>Water</item>
+        <item>Pulse</item>
+        <item>Electric On</item>
+        <item>Electric Off</item>
+        <item>Clap</item>
+        <item>Alex</item>
+        <item>Turn</item>
+        <item>Steam</item>
+        <item>Pull</item>
+        <item>Release</item>
+        <item>Reset</item>
+        <item>Start</item>
+    </string-array>
+        
     <string-array name="gadgets_array">
         <item>Candle</item>
         <item>Christmas Tree</item>
@@ -28,11 +47,14 @@
         <item>Wire Left Right</item>
         <item>Wire Up Down</item>
     </string-array>
+    
     <string name="gadget_spinner_prompt">Select Gadget</string>
+    <string name="event_spinner_prompt">Select Event</string>
     
     <string name="qr_scan">QR Scan</string>
     <string name="wifi_settings">Wifi Settings</string>
     <string name="wifi_connect_to_server_button_text">Connect to Server</string>
     <string name="ip_address">192.168.5.127</string>
+    
     
 </resources>

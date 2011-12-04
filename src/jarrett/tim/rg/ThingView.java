@@ -146,7 +146,7 @@ abstract public class ThingView extends ImageView
      */
     public void receiveEvent(String event)
     {   
-    	Log.d("Tim", "Received message: " + event);
+    	Log.d(RgTools.SERVER, "Received message: " + event);
     	
         //Translate the event
         EventMessage em;
@@ -156,7 +156,10 @@ abstract public class ThingView extends ImageView
             
         } catch ( Exception e ) {
             //Something went wrong, complain about it but otherwise just swallow the error...
-            RgTools.createNotification(this.context, "Invalid event", "Invalid event " + event + " received", android.R.drawable.ic_menu_share);            
+        	String error = "Invalid event " + event + " received";
+        	Log.e(RgTools.SERVER, error, e);
+        	
+            RgTools.createNotification(this.context, "Invalid event", error, android.R.drawable.ic_menu_share);            
             return;
         }
         
@@ -165,6 +168,9 @@ abstract public class ThingView extends ImageView
             reset();
             
         } else {
+        	
+        	Log.d(RgTools.SERVER, "Received Event: " + em.getEvent().toString());
+        	
             //Try to get the next state map
             Map<Event, StateTransitionPackage> nextStateMap = transitions.get(state);
             
@@ -177,19 +183,22 @@ abstract public class ThingView extends ImageView
                 
             }
             
+            
             //Still here? Then we have a non-null map. Now try to see if we have 
             //a state to transition to...
             StateTransitionPackage pkg = nextStateMap.get(em.getEvent());
+           
+            Log.d(RgTools.SERVER, "Thing Next State: " + pkg.getNextState().toString());
             
             if ( state.toString().equals("Taut") && em.getEvent().toString().equals("Release") ) {
             	if ( pkg == null ) {
-            		Log.d("Tim", "No match...");
+            		Log.d(RgTools.SERVER, "No match...");
             	}
             }
             
             //Do the check again. This time, we expect null to happen from time-to-time, just ignore it
             if ( pkg == null ) {
-            	Log.d("Tim", "Current State: " + this.state.toString() + "; Current Event: " + em.getEvent().toString());
+            	Log.d(RgTools.SERVER, "Current State: " + this.state.toString() + "; Current Event: " + em.getEvent().toString());
                 setEmits(null);
                 return;
                 
@@ -225,11 +234,11 @@ abstract public class ThingView extends ImageView
             	
             	//If the direction is opposite, then we are probably dealing with a Wire or a Rope (otherwise something is really wrong)
             	if ( direction == Direction.OPPOSITE ) {
-            		Log.d("Tim", "Came from direction: " + getOppositeDirection(em.getDirection()).toString());
+            		Log.d(RgTools.SERVER, "Came from direction: " + getOppositeDirection(em.getDirection()).toString());
             		
             		//Figure out the OPPOSITE of the incoming event
             		Direction opposite = getOppositeEnd(getOppositeDirection(em.getDirection()));
-            		Log.d("Tim", "So opposite end would be... " + opposite);
+            		Log.d(RgTools.SERVER, "So opposite end would be... " + opposite);
             		
             		//If the opposite makes sense... (is not null)
             		if ( opposite != null ) {
