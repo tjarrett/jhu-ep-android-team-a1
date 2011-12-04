@@ -187,13 +187,15 @@ abstract public class ThingView extends ImageView
             //Still here? Then we have a non-null map. Now try to see if we have 
             //a state to transition to...
             StateTransitionPackage pkg = nextStateMap.get(em.getEvent());
-           
-            Log.d(RgTools.SERVER, "Thing Next State: " + pkg.getNextState().toString());
             
+            //If the current state is Taut and the event is Release...
             if ( state.toString().equals("Taut") && em.getEvent().toString().equals("Release") ) {
+                //.. and the pkg is null, then we don't have a match so complain abut it, but keep going... 
             	if ( pkg == null ) {
             		Log.d(RgTools.SERVER, "No match...");
+            		
             	}
+            	
             }
             
             //Do the check again. This time, we expect null to happen from time-to-time, just ignore it
@@ -206,6 +208,12 @@ abstract public class ThingView extends ImageView
             
             //All pkgs have a nextState
             ThingState nextState = pkg.getNextState();
+            
+            //Output the next state...
+            if ( pkg.getNextState() != null ) {
+                Log.d(RgTools.SERVER, "Thing Next State: " + pkg.getNextState().toString());
+                
+            }
             
             //Otherwise, transition the state
             setState(nextState);
