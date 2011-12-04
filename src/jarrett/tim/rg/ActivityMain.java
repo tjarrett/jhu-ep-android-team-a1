@@ -29,6 +29,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -341,21 +342,22 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
 
         });
 
-//        //Connect to socket server via ip address defined in ip address textview
-//        if ( RgTools.wifiMode ) {
-//        	TextView ipAddress = (TextView)findViewById(R.id.ip_address);
-//        	Log.d(RgTools.DEBUG, "retrieved ip address: " + ipAddress.getText());
-//			Socket socket = null;
-//			try {
-//				socket = new Socket(ipAddress.getText().toString(), 4242);
-//			} catch (UnknownHostException e) {
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//            socketHandler = new GadgetSocketHandler(this, socket);
-//            socketHandler.start();
-//        }
+        
+        //Connect to socket server via ip address defined in ip address textview
+        if ( RgTools.wifiMode ) {
+        	EditText ipAddress = (EditText)findViewById(R.id.ip_address);
+        	Log.d(RgTools.DEBUG, "retrieved ip address: " + ipAddress.getText());
+			Socket socket = null;
+			try {
+				socket = new Socket(ipAddress.getText().toString(), 4242);
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            socketHandler = new GadgetSocketHandler(this, socket);
+            socketHandler.start();
+        }
         
         // Get the frame view
         frame = (FrameLayout)findViewById(R.id.frame);
@@ -430,11 +432,16 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
      */
     private void sendEvent(String location, String eventString, Direction direction)
     {
+    	int x = 0;
+    	int y = 0;
     	RgTools.createNotification(getApplicationContext(), "Sending Event", eventString, android.R.drawable.ic_menu_share);
-    	String[] locationSplit = location.split(",");
-    	int x = Integer.parseInt(locationSplit[0]);
-    	int y = Integer.parseInt(locationSplit[1]);
-
+    	
+    	if (!location.equalsIgnoreCase("Unknown")) {
+    		String[] locationSplit = location.split(",");
+    		x = Integer.parseInt(locationSplit[0]);
+    		y = Integer.parseInt(locationSplit[1]);
+    	}
+    	
     	EventCarrier eventCarrier = new EventCarrier(Event.valueOf(eventString), x, y, 0, direction);
     	if ( RgTools.wifiMode ) {
     		socketHandler.send(eventCarrier); 
