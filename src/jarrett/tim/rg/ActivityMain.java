@@ -20,7 +20,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -33,7 +32,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -70,12 +68,17 @@ public class ActivityMain extends Activity implements Reporter,
 	 * The currentPosition within the grid. Defaults to unknown (maybe we should
 	 * default to 0,0?)
 	 */
-	private String currentPosition = "unknown";
+	private String currentPosition = "0,1";
 
 	/**
 	 * The socketHander for network connectivity
 	 */
 	private SocketHandler socketHandler;
+
+	/**
+	 * Out IP address field
+	 */
+    private EditText ipAddress;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -85,6 +88,36 @@ public class ActivityMain extends Activity implements Reporter,
 
 		// As per Prof. Stanchfield...
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		
+		//The IP Address field, so we don't have to recompile in class
+		ipAddress = (EditText)findViewById(R.id.ip_address);
+		
+		//Make a connect button to connect to the given IP address
+		Button btnConnect = (Button)findViewById(R.id.connect);
+		btnConnect.setOnClickListener(new OnClickListener() {
+		    /**
+		     * Handle the connect button being clicked...
+		     */
+            @Override
+            public void onClick(View arg0)
+            {
+                //Connect to socket server via ip address defined in ip address textview
+                Socket socket = null;
+                try {
+                    socket = new Socket(ipAddress.getText().toString(), 4242);
+                    socketHandler = new GadgetSocketHandler(ActivityMain.this, socket);
+                    socketHandler.start();
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+               
+                
+            }
+		    
+		});
 
 		// Populate our maps based on the gadgets_array
 		// -- to add more gadget create an entry in the gadgets_array and create
@@ -146,11 +179,7 @@ public class ActivityMain extends Activity implements Reporter,
 												"Thing fired off this: "
 														+ finalMsg);
 
-										if (RgTools.wifiMode) {
-											// Send the message
-											// sendEvent(finalMsg);
-
-										}
+										sendEvent(finalMsg);
 
 									}// end for
 
@@ -308,23 +337,6 @@ public class ActivityMain extends Activity implements Reporter,
 		updateCurrentPositionView();
 
 		currentState = (TextView) findViewById(R.id.current_state);
-		
-        //Connect to socket server via ip address defined in ip address textview
-        if ( isConnected(this) ) {
-            EditText ipAddress = (EditText)findViewById(R.id.ip_address);
-            Log.d(RgTools.DEBUG, "retrieved ip address: " + ipAddress.getText());
-            Socket socket = null;
-            try {
-                socket = new Socket(ipAddress.getText().toString(), 4242);
-                socketHandler = new GadgetSocketHandler(this, socket);
-                socketHandler.start();
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
 
 		// Get the frame view
 		frame = (FrameLayout) findViewById(R.id.frame);
@@ -400,16 +412,37 @@ public class ActivityMain extends Activity implements Reporter,
 				+ currentThing.getState().toString());
 
 	}// end updateCurrentStateMessage
-
+	
+	/**
+	 * Parse out a string formatted like 0,1|Heat|Up and pass it on to the new sendEvent method
+	 * @param eventMessage
+	 */
+	private void sendEvent(String eventMessage)
+	{
+	    //Split it apart
+	    String[] bits = eventMessage.split("\\|");
+	    
+	    if ( bits.length == 2 ) {
+	        sendEvent(bits[0], bits[1], null);
+	        
+	    } else if ( bits.length == 3 ) {
+	        Direction direction = Direction.valueOf(bits[2]);
+	        sendEvent(bits[0], bits[1], direction);
+	        
+	    } else {
+	        //Put error message here
+	    }
+	    
+	}//end sendEvent
+	
 	/**
 	 * Send the given event to the widget (either over network or locally)
-	 * 
-	 * @param event
+	 * @param location
+	 * @param eventString
+	 * @param direction
 	 */
-	private void sendEvent(String location, String eventString,
-			Direction direction) {
-		RgTools.createNotification(getApplicationContext(), "Sending Event",
-				eventString, android.R.drawable.ic_menu_share);
+	private void sendEvent(String location, String eventString, Direction direction) {
+		RgTools.createNotification(getApplicationContext(), "Sending Event", eventString, android.R.drawable.ic_menu_share);
 
 		if (!location.equals("unknown")) {
 			String[] locationSplit = location.split(",");
@@ -534,16 +567,5 @@ public class ActivityMain extends Activity implements Reporter,
 	public void report(String line) {
 		Log.d("Rube", line);
 	}
-	
-    private static boolean isConnected(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = null;
-        if ( connectivityManager != null ) {
-            networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            
-        }
-        
-        return networkInfo == null ? false : networkInfo.isConnected();
-    }
 
 }// end ActivityMain
