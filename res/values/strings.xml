@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Team A1s Rube Goldberg</string>
+    <string name="app_name">Team A1\'s Rube Goldberg</string>
     <string name="Heat">Heat</string>
     <string name="Water">Water</string>
     <string name="Pulse">Pulse</string>
@@ -30,11 +30,9 @@
     </string-array>
     <string name="gadget_spinner_prompt">Select Gadget</string>
     
-    <string name="bluetooth_server">Bluetooth Server</string>
-    <string name="bluetooth_make_discoverable">Make Server Discoverable</string>
-    <string name="bluetooth_discoverable_button_text">Start Discovery Mode</string>
-    <string name="bluetooth_connect_to_server">Show list of bluetooth devices</string>
-    <string name="bluetooth_connect_to_server_button_text">Start Discovering Devices</string>
-    <string name="bluetooth_settings">Bluetooth Settings</string>
     <string name="qr_scan">QR Scan</string>
+    <string name="wifi_settings">Wifi Settings</string>
+    <string name="wifi_connect_to_server_button_text">Connect to Server</string>
+    <string name="enter_ip_address_text">Enter Server IP Address</string>
+    
 </resources>

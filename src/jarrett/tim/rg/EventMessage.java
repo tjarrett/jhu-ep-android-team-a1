@@ -93,7 +93,7 @@ public class EventMessage
         }
         
         //Otherwise error
-        Log.d(ActivityMain.DEBUG, "Malformed input received: " + evt);
+        Log.d(RgTools.DEBUG, "Malformed input received: " + evt);
         throw new IllegalArgumentException("The event " + evt + " is not recognized as valid");
         
     }//end parse

@@ -19,11 +19,6 @@
         android:prompt="@string/gadget_spinner_prompt" />
     
     <TextView
-        android:id="@+id/ip_address" 
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-    
-    <TextView
         android:id="@+id/current_state" 
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />

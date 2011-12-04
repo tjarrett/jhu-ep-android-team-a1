@@ -45,7 +45,6 @@ import android.widget.TextView;
  */
 public class ActivityMain extends Activity implements Reporter,SocketHandlerHolder
 {	
-	public static final String DEBUG = "A1-DEBUG";
 	
 	/**
 	 * If this is set to true, will try to send button press events via wifi otherwise 
@@ -95,20 +94,21 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
         //As per Prof. Stanchfield...
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         
-        //Connect to socket server via ip address defined in ip address textview
-        if ( wifiMode ) {
-        	TextView ipAddress = (TextView)findViewById(R.id.ip_address);
-			Socket socket = null;
-			try {
-				socket = new Socket(ipAddress.getText().toString(), 4242);
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-            socketHandler = new GadgetSocketHandler(this, socket);
-            socketHandler.start();
-        }
+//        //Connect to socket server via ip address defined in ip address textview
+//        if ( wifiMode ) {
+//        	TextView ipAddress = (TextView)findViewById(R.id.ip_address);
+//        	Log.d(RgTools.DEBUG, "retrieved ip address: " + ipAddress);
+//			Socket socket = null;
+//			try {
+//				socket = new Socket(ipAddress.getText().toString(), 4242);
+//			} catch (UnknownHostException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//            socketHandler = new GadgetSocketHandler(this, socket);
+//            socketHandler.start();
+//        }
 
         // Populate our maps based on the gadgets_array
         // -- to add more gadget create an entry in the gadgets_array and create
@@ -436,7 +436,7 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
     }// end updateCurrentStateMessage
     
     /**
-     * Send the given event to the widget (either over bluetooth or locally)
+     * Send the given event to the widget (either over network or locally)
      * @param event
      */
     private void sendEvent(String location, String eventString, Direction direction)
@@ -446,9 +446,7 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
     	int x = Integer.parseInt(locationSplit[0]);
     	int y = Integer.parseInt(locationSplit[1]);
 
-    	com.javadude.rube.protocol.Event event = Event.valueOf(eventString);
-    	EventCarrier eventCarrier = new EventCarrier(event, x, y, 0, direction);
-//    	EventCarrier eventCarrier = new EventCarrier(Event.valueOf(eventString), x, y, 0, direction);
+    	EventCarrier eventCarrier = new EventCarrier(Event.valueOf(eventString), x, y, 0, direction);
     	if ( wifiMode ) {
     		socketHandler.send(eventCarrier); 
         } else {
@@ -525,14 +523,20 @@ public class ActivityMain extends Activity implements Reporter,SocketHandlerHold
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item)
     {
-        switch ( item.getItemId() ) {
-            case R.id.qr_scanning:
-            	Log.d(RgTools.QR_SCANNER, "Initiating QR Scan");
-            	IntentIntegrator integrator = new IntentIntegrator(this);
-            	integrator.initiateScan();
-            	Log.d(RgTools.QR_SCANNER, " --------------- Got thing:  " + integrator.getMessage());
-            	break;
-            	
+		switch (item.getItemId()) {
+		case R.id.wifi_settings:
+
+			startActivityForResult(new Intent(this, ActivityWifi.class), ActivityWifi.SERVER_CONNECTION);
+
+			return true;
+		case R.id.qr_scanning:
+			Log.d(RgTools.QR_SCANNER, "Initiating QR Scan");
+			IntentIntegrator integrator = new IntentIntegrator(this);
+			integrator.initiateScan();
+			Log.d(RgTools.QR_SCANNER, " --------------- Got thing:  "
+					+ integrator.getMessage());
+			break;
+
         }//end switch
         
         return super.onMenuItemSelected(featureId, item);

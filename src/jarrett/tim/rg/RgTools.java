@@ -7,6 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 
 public class RgTools {
+	
+	public static final String DEBUG = "Group-A1-DEBUG";
+	
     public static final String SERVER = "Group-A1-Server";
 
 	public static final String CLIENT = "Group-A1-Client";
