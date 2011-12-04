@@ -19,6 +19,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -76,9 +78,26 @@ public class ActivityMain extends Activity implements Reporter,
 	private SocketHandler socketHandler;
 
 	/**
+	 * Handler to get message back onto the UI thread
+	 * Based on code here:
+	 * http://stackoverflow.com/questions/5097267/error-only-the-original-thread-that-created-a-view-hierarchy-can-touch-its-view
+	 */
+	private Handler messageHandler = new Handler() {
+		/**
+		 * Handle a message
+		 */
+		@Override
+		public void handleMessage(Message msg) {
+			String event = (String) msg.obj;
+			ActivityMain.this.applyEventToCurrentThing(event);
+		}
+
+	};
+
+	/**
 	 * Out IP address field
 	 */
-    private EditText ipAddress;
+	private EditText ipAddress;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -88,35 +107,34 @@ public class ActivityMain extends Activity implements Reporter,
 
 		// As per Prof. Stanchfield...
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		
-		//The IP Address field, so we don't have to recompile in class
-		ipAddress = (EditText)findViewById(R.id.ip_address);
-		
-		//Make a connect button to connect to the given IP address
-		Button btnConnect = (Button)findViewById(R.id.connect);
-		btnConnect.setOnClickListener(new OnClickListener() {
-		    /**
-		     * Handle the connect button being clicked...
-		     */
-            @Override
-            public void onClick(View arg0)
-            {
-                //Connect to socket server via ip address defined in ip address textview
-                Socket socket = null;
-                try {
-                    socket = new Socket(ipAddress.getText().toString(), 4242);
-                    socketHandler = new GadgetSocketHandler(ActivityMain.this, socket);
-                    socketHandler.start();
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
 
-               
-                
-            }
-		    
+		// The IP Address field, so we don't have to recompile in class
+		ipAddress = (EditText) findViewById(R.id.ip_address);
+
+		// Make a connect button to connect to the given IP address
+		Button btnConnect = (Button) findViewById(R.id.connect);
+		btnConnect.setOnClickListener(new OnClickListener() {
+			/**
+			 * Handle the connect button being clicked...
+			 */
+			@Override
+			public void onClick(View arg0) {
+				// Connect to socket server via ip address defined in ip address
+				// textview
+				Socket socket = null;
+				try {
+					socket = new Socket(ipAddress.getText().toString(), 4242);
+					socketHandler = new GadgetSocketHandler(ActivityMain.this,
+							socket);
+					socketHandler.start();
+				} catch (UnknownHostException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			}
+
 		});
 
 		// Populate our maps based on the gadgets_array
@@ -287,19 +305,19 @@ public class ActivityMain extends Activity implements Reporter,
 						}
 
 					}
+				} else {
+					Log.d(RgTools.DEBUG,
+							"Selected the 0th position in spinner.");
 				}
-				else {
-					Log.d(RgTools.DEBUG, "Selected the 0th position in spinner.");
-				}
-				
-				//reset to 'Select Event'
+
+				// reset to 'Select Event'
 				parent.setSelection(0);
 
 			}
 
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) {
-				//Do nothing
+				// Do nothing
 			}// end onClick
 
 		});
@@ -412,37 +430,41 @@ public class ActivityMain extends Activity implements Reporter,
 				+ currentThing.getState().toString());
 
 	}// end updateCurrentStateMessage
-	
+
 	/**
-	 * Parse out a string formatted like 0,1|Heat|Up and pass it on to the new sendEvent method
+	 * Parse out a string formatted like 0,1|Heat|Up and pass it on to the new
+	 * sendEvent method
+	 * 
 	 * @param eventMessage
 	 */
-	private void sendEvent(String eventMessage)
-	{
-	    //Split it apart
-	    String[] bits = eventMessage.split("\\|");
-	    
-	    if ( bits.length == 2 ) {
-	        sendEvent(bits[0], bits[1], null);
-	        
-	    } else if ( bits.length == 3 ) {
-	        Direction direction = Direction.valueOf(bits[2]);
-	        sendEvent(bits[0], bits[1], direction);
-	        
-	    } else {
-	        //Put error message here
-	    }
-	    
-	}//end sendEvent
-	
+	private void sendEvent(String eventMessage) {
+		// Split it apart
+		String[] bits = eventMessage.split("\\|");
+
+		if (bits.length == 2) {
+			sendEvent(bits[0], bits[1], null);
+
+		} else if (bits.length == 3) {
+			Direction direction = Direction.valueOf(bits[2]);
+			sendEvent(bits[0], bits[1], direction);
+
+		} else {
+			// Put error message here
+		}
+
+	}// end sendEvent
+
 	/**
 	 * Send the given event to the widget (either over network or locally)
+	 * 
 	 * @param location
 	 * @param eventString
 	 * @param direction
 	 */
-	private void sendEvent(String location, String eventString, Direction direction) {
-		RgTools.createNotification(getApplicationContext(), "Sending Event", eventString, android.R.drawable.ic_menu_share);
+	private void sendEvent(String location, String eventString,
+			Direction direction) {
+		RgTools.createNotification(getApplicationContext(), "Sending Event",
+				eventString, android.R.drawable.ic_menu_share);
 
 		if (!location.equals("unknown")) {
 			String[] locationSplit = location.split(",");
@@ -454,12 +476,13 @@ public class ActivityMain extends Activity implements Reporter,
 			if (RgTools.wifiMode && socketHandler != null) {
 				socketHandler.send(eventCarrier);
 			} else {
-				applyEventToCurrentThing(x + "," + y + "|" + eventString
-						+ "|" + Direction.NULL);
+				applyEventToCurrentThing(x + "," + y + "|" + eventString + "|"
+						+ Direction.NULL);
 
 			}
 		} else {
-			applyEventToCurrentThing(location + "|" + eventString + "|" + Direction.NULL);
+			applyEventToCurrentThing(location + "|" + eventString + "|"
+					+ Direction.NULL);
 		}
 
 	}// end sendEvent
@@ -527,7 +550,26 @@ public class ActivityMain extends Activity implements Reporter,
 	 * @param eventCarrier
 	 */
 	public void sendToHandler(EventCarrier eventCarrier) {
-		// TODO Auto-generated method stub
+		// We programmer ThingView to take string formatted as:
+		// 0,1|Heat|UP (for example)
+		// Might refactor in future, but for now just make the message the way
+		// we like
+
+		String msg = eventCarrier.getX() + "," + eventCarrier.getY() + "|"
+				+ eventCarrier.getEvent().toString();
+
+		if (eventCarrier.getDirection() != null) {
+			msg += "|" + eventCarrier.getDirection().toString();
+
+		} else {
+			msg += "|NULL";
+		}
+
+		//We are on the wrong thead... see:
+		// http://stackoverflow.com/questions/5097267/error-only-the-original-thread-that-created-a-view-hierarchy-can-touch-its-view
+		Message uiMessage = new Message();
+		uiMessage.obj = msg;
+		messageHandler.sendMessage(uiMessage);
 
 	}
 
@@ -556,7 +598,7 @@ public class ActivityMain extends Activity implements Reporter,
 	 */
 	@Override
 	public void report(String message, Throwable t) {
-		Log.d("Rube", message, t);
+		Log.d("Rube1", message, t);
 	}
 
 	/**
@@ -565,7 +607,7 @@ public class ActivityMain extends Activity implements Reporter,
 	 */
 	@Override
 	public void report(String line) {
-		Log.d("Rube", line);
+		Log.d("Rube2", line);
 	}
 
 }// end ActivityMain
