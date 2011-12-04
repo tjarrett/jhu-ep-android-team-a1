@@ -16,6 +16,8 @@ import com.javadude.rube.protocol.SocketHandlerHolder;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -306,6 +308,23 @@ public class ActivityMain extends Activity implements Reporter,
 		updateCurrentPositionView();
 
 		currentState = (TextView) findViewById(R.id.current_state);
+		
+        //Connect to socket server via ip address defined in ip address textview
+        if ( isConnected(this) ) {
+            EditText ipAddress = (EditText)findViewById(R.id.ip_address);
+            Log.d(RgTools.DEBUG, "retrieved ip address: " + ipAddress.getText());
+            Socket socket = null;
+            try {
+                socket = new Socket(ipAddress.getText().toString(), 4242);
+                socketHandler = new GadgetSocketHandler(this, socket);
+                socketHandler.start();
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
 
 		// Get the frame view
 		frame = (FrameLayout) findViewById(R.id.frame);
@@ -515,5 +534,16 @@ public class ActivityMain extends Activity implements Reporter,
 	public void report(String line) {
 		Log.d("Rube", line);
 	}
+	
+    private static boolean isConnected(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = null;
+        if ( connectivityManager != null ) {
+            networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            
+        }
+        
+        return networkInfo == null ? false : networkInfo.isConnected();
+    }
 
 }// end ActivityMain
