@@ -1,8 +1,16 @@
 package jarrett.tim.rg;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.*;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.javadude.rube.protocol.EventCarrier;
+import com.javadude.rube.protocol.Reporter;
+import com.javadude.rube.protocol.SocketHandler;
+import com.javadude.rube.protocol.SocketHandlerHolder;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -35,17 +43,17 @@ import android.widget.TextView;
  * @author tjarrett
  * 
  */
-public class ActivityMain extends Activity
+public class ActivityMain extends Activity implements Reporter,SocketHandlerHolder
 {	
 	public static final String DEBUG = "A1-DEBUG";
 	
 	/**
-	 * If this is set to true, will try to send button press events via bluetooth otherwise 
+	 * If this is set to true, will try to send button press events via wifi otherwise 
 	 * keeps the events local -- mostly for testing purposes in an emulator only. Leave this 
-	 * as true as it will get flipped to false if no bluetooth is detected (and a message will 
+	 * as true as it will get flipped to false if no wifi is detected (and a message will 
 	 * be displayed)
 	 */
-	private boolean bluetoothMode = true;
+	private boolean wifiMode = true;
 
 	/**
      * The list of ThingViews mapped by the values in the spinner
@@ -68,63 +76,14 @@ public class ActivityMain extends Activity
     private TextView currentState;
     
     /**
-     * Reference to our bluetooth server
-     */
-    private BluetoothServer bts;
-    
-    /**
      * The currentPosition within the grid. Defaults to unknown (maybe we should default to 0,0?)
      */
     private String currentPosition = "unknown";
     
     /**
-     * This handler responds to incoming messages via bluetooth
-     * 
-     * @todo Figure out a better way to differentiate between incoming commands and something that has been 
-     *       "emitted" from the remote devices
+     * The socketHander for network connectivity
      */
-    private final Handler handler = new Handler() 
-    {
-        /**
-         * Handles incoming messages
-         */
-        @Override
-        public void handleMessage(Message msg)
-        {
-            switch ( msg.what ) {
-                case BluetoothServer.BLUETOOTH_MESSAGE:
-                    //Get the buffer out of the message
-                    byte[] buffer = (byte[])msg.obj;
-                    
-                    //Turn the buffer into a string
-                    String content = new String(buffer, 0, msg.arg1);
-                    Log.d(RgTools.SERVER, "Received " + content);
-                    
-                    //Swallow acknowledgements (caused by responding with (int)1 which we aren't doing
-                    if ( content.trim().equals("") ) {
-                        return;
-                    }
-                    
-                    //Message is a server response...
-                    if ( content.indexOf("[") != -1 ) {
-                        //I can ignore this as the client
-                        RgTools.createNotification(getApplicationContext(), "Receiving Response", content, android.R.drawable.ic_input_add); //This doesn't work when multiple responses coming in succession
-                        Log.d(RgTools.CLIENT, content);
-                        
-                    } else {
-                        //I'm the server so I need to keep going
-                    	RgTools.createNotification(getApplicationContext(), "Receiving ", content, android.R.drawable.ic_input_add);
-                        applyEventToCurrentThing(content);
-                        
-                    }
-                    
-                    break;
-                    
-            }//end switch
-            
-        }//end handleMessage
-        
-    };//end Handler
+    private SocketHandler socketHandler;
 
     /** Called when the activity is first created. */
     @Override
@@ -136,11 +95,19 @@ public class ActivityMain extends Activity
         //As per Prof. Stanchfield...
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         
-        //Wire up bluetooth
-        if ( bluetoothMode ) {
-            bts = BluetoothServer.factory(this, handler);
-            bts.initBluetooth();
-            
+        //Connect to socket server via ip address defined in ip address textview
+        if ( wifiMode ) {
+        	TextView ipAddress = (TextView)findViewById(R.id.ip_address);
+			Socket socket = null;
+			try {
+				socket = new Socket(ipAddress.getText().toString(), 4242);
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            socketHandler = new GadgetSocketHandler(this, socket);
+            socketHandler.start();
         }
 
         // Populate our maps based on the gadgets_array
@@ -191,9 +158,9 @@ public class ActivityMain extends Activity
                                         
                                         Log.d(RgTools.SERVER, "Thing fired off this: " + finalMsg);
                                         
-                                        if ( bluetoothMode ) {
+                                        if ( wifiMode ) {
                                             //Send the message
-                                            sendEvent(finalMsg);
+                                            //sendEvent(finalMsg);
                                             
                                         }
                                         
@@ -299,16 +266,18 @@ public class ActivityMain extends Activity
                     //I think this is going to be a problem since we are now supposed to send 
                     //Right, Left, Up, Down, etc
                     String direction = "ALL";
+                    Direction directionObject = Direction.ALL;
 
                     if ( "Heat".equals(text) ) {
                         direction = "UP";
-
+                        directionObject = Direction.UP;
+                        
                     } else if ( "Water".equals(text) ) {
                         direction = "DOWN";
-
+                        directionObject = Direction.DOWN;
+                        
                     } else if ( "Reset".equals(text) || "Register".equals(text) ) {
                         direction = null;
-                        
                     } 
 
                     //Append direction if it makes sense
@@ -326,28 +295,27 @@ public class ActivityMain extends Activity
                     	
                     	//If it's ElectricOn, send both Up and Right
                     	if ( "ElectricOn".equals(text) ) {
-                    		sendEvent(currentPosition + "|" + text + "|" + Direction.UP.toString());
-                    		sendEvent(currentPosition + "|" + text + "|" + Direction.RIGHT.toString());
+                    		sendEvent(currentPosition, text, Direction.UP);
+                    		sendEvent(currentPosition, text, Direction.RIGHT);
                     		
                         //If it's ElectricOff, send Down and left
                     	} else if ( "ElectricOff".equals(text) ) {
-                    		sendEvent(currentPosition + "|" + text + "|" + Direction.DOWN.toString());
-                    		sendEvent(currentPosition + "|" + text + "|" + Direction.LEFT.toString());       
-                    		sendEvent(currentPosition + "|" + text + "|" + Direction.RIGHT.toString());
+                    		sendEvent(currentPosition, text, Direction.DOWN);
+                    		sendEvent(currentPosition, text, Direction.LEFT);       
+                    		sendEvent(currentPosition, text, Direction.RIGHT);
                     		
                     	} else if ( "Pull".equals(text) ) {
-                    		sendEvent(currentPosition + "|" + text + "|" + Direction.UP.toString());
-                    		sendEvent(currentPosition + "|" + text + "|" + Direction.RIGHT.toString());
-                    		sendEvent(currentPosition + "|" + text + "|" + Direction.LEFT.toString());
+                    		sendEvent(currentPosition, text, Direction.UP);
+                    		sendEvent(currentPosition, text, Direction.RIGHT);
+                    		sendEvent(currentPosition, text, Direction.LEFT);
                     		
                     	} else if ( "Release".equals(text) ) {
-                    		sendEvent(currentPosition + "|" + text + "|" + Direction.DOWN.toString());
-                    		sendEvent(currentPosition + "|" + text + "|" + Direction.LEFT.toString());
+                    		sendEvent(currentPosition, text, Direction.DOWN);
+                    		sendEvent(currentPosition, text, Direction.LEFT);
                     		
                     	} else {
                     		//Everything else send the event we constructed
-                    		sendEvent(event);
-                    		
+                    		sendEvent(currentPosition, text, directionObject);
                     	}
                     	
                     }
@@ -411,7 +379,7 @@ public class ActivityMain extends Activity
     @Override protected void onDestroy() 
     {
         //unregister any of our broadcast receivers
-        unregisterReceiver(bts.getBroadcastReceiver());
+        socketHandler.close();
         super.onDestroy();
         
     }//end onDestroy
@@ -471,14 +439,18 @@ public class ActivityMain extends Activity
      * Send the given event to the widget (either over bluetooth or locally)
      * @param event
      */
-    private void sendEvent(String event)
+    private void sendEvent(String location, String eventString, Direction direction)
     {
-    	RgTools.createNotification(getApplicationContext(), "Sending Event", event, android.R.drawable.ic_menu_share);
-        if ( bluetoothMode ) {
-            bts.send(event);
-            
+    	RgTools.createNotification(getApplicationContext(), "Sending Event", eventString, android.R.drawable.ic_menu_share);
+    	String[] locationSplit = location.split(",");
+    	int x = Integer.parseInt(locationSplit[0]);
+    	int y = Integer.parseInt(locationSplit[1]);
+
+    	EventCarrier eventCarrier = new EventCarrier(Event.valueOf(eventString), x, y, 0, direction);
+    	if ( wifiMode ) {
+    		socketHandler.send(eventCarrier); 
         } else {
-            applyEventToCurrentThing(event);
+            applyEventToCurrentThing(eventString);
             
         }
         
@@ -494,8 +466,8 @@ public class ActivityMain extends Activity
              * This is really just for the emulator...
              */
             case BluetoothServer.DIALOG_NO_BLUETOOTH:
-                bluetoothMode = false;
-                return create("Your device does not appear to support bluetooth. Falling back to local only mode.", false);
+                wifiMode = false;
+                return create("Your device does not appear to support wifi. Falling back to local only mode.", false);
 
             case BluetoothServer.DIALOG_WE_HAVE_BLUETOOTH:
                 return create("We have bluetooth! Yippie!", false);
@@ -507,7 +479,7 @@ public class ActivityMain extends Activity
                 return create("Bluetooth was already enabled", false);
 
             case BluetoothServer.DIALOG_USER_IS_EVIL:
-                return create("You MUST enable bluetooth for this application to work!", true);
+                return create("You MUST enable wifi for this application to work!", true);
 
         }// end switch
 
@@ -552,10 +524,6 @@ public class ActivityMain extends Activity
     public boolean onMenuItemSelected(int featureId, MenuItem item)
     {
         switch ( item.getItemId() ) {
-            case R.id.bluetooth_settings:
-                startActivityForResult(new Intent(this, ActivityBluetooth.class), BluetoothServer.SELECTING_DEVICE);
-                return true;
-                
             case R.id.qr_scanning:
             	Log.d(RgTools.QR_SCANNER, "Initiating QR Scan");
             	IntentIntegrator integrator = new IntentIntegrator(this);
@@ -574,31 +542,6 @@ public class ActivityMain extends Activity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
 		switch ( requestCode ) {
-		    /* handle the case where we tried to enable bluetooth */
-    		case BluetoothServer.BLUETOOTH_ENABLED:
-    		    //Handle the case where it wasn't enabled
-    			if ( resultCode != RESULT_OK ) {
-    				showDialog(BluetoothServer.DIALOG_USER_IS_EVIL);
-    				try {
-                        finalize(); //bluetooth not enabled but it is required so quit
-                        
-                    } catch ( Throwable e ) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                        
-                    }
-    			
-    		    //Otherwise it was enabled so start the BluetoothServer
-    			} else {
-    			    bluetoothMode = true;
-    	            if ( !bts.isServerRunning() ) {
-    	                bts.startServer();
-    	                
-    	            }
-    	            
-    			}
-    			break;
-    	
     	    /* Handle QR code stuff */
     		case IntentIntegrator.REQUEST_CODE:
     			IntentResult scanResult = IntentIntegrator.parseActivityResult(
@@ -620,5 +563,52 @@ public class ActivityMain extends Activity
         super.onActivityResult(requestCode, resultCode, data);
         
     }//end onActivityResult
+
+    /**
+     * Take the contents of the EventCarrier 
+     * and perform the event against your state machine
+     * @param eventCarrier
+     */
+	public void sendToHandler(EventCarrier eventCarrier) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/**
+	 * 
+	 * @param socketHandler
+	 */
+    @Override 
+    public void addSocketHandler(SocketHandler socketHandler) {
+        this.socketHandler = socketHandler;
+    }
+    
+    /**
+     * 
+     * @param socketHandler
+     */
+    @Override
+    public void removeSocketHandler(SocketHandler socketHandler) {
+        this.socketHandler = null;
+    }
+    
+    /**
+     * 
+     * @param message
+     * @param t
+     */
+    @Override 
+    public void report(String message, Throwable t) {
+        Log.d("Rube",message,t);
+    }
+    
+    /**
+     * 
+     * @param line
+     */
+    @Override 
+    public void report(String line) {
+        Log.d("Rube",line);
+    }
 
 }// end ActivityMain
