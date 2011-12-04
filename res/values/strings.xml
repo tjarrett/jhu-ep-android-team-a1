@@ -54,7 +54,8 @@
     <string name="qr_scan">QR Scan</string>
     <string name="wifi_settings">Wifi Settings</string>
     <string name="wifi_connect_to_server_button_text">Connect to Server</string>
-    <string name="ip_address">192.168.5.241</string>
+    <string name="ip_address">192.168.1.137</string>
+    <string name="connect">Connect</string>
     
     
 </resources>
