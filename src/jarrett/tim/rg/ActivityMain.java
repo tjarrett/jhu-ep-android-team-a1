@@ -70,7 +70,7 @@ public class ActivityMain extends Activity implements Reporter,
 	 * The currentPosition within the grid. Defaults to unknown (maybe we should
 	 * default to 0,0?)
 	 */
-	private String currentPosition = "0,1";
+	private String currentPosition = "unknown";
 
 	/**
 	 * The socketHander for network connectivity
