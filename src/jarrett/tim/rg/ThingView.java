@@ -12,6 +12,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -448,6 +449,30 @@ abstract public class ThingView extends ImageView
         
         //Get our bitmap
         Bitmap image = BitmapFactory.decodeResource(getResources(), imageResource);  
+        Log.d(RgTools.DEBUG, "origWidth: " + image.getWidth());
+    	Log.d(RgTools.DEBUG, "origHeight: " + image.getHeight());    	
+        
+        //Get the aspect ratio
+        float newWidth = 0;
+        float newHeight = 0;
+        
+        //Figure out the widest size
+        if ( image.getWidth() >= image.getHeight() ) {
+        	newWidth = getWidth();
+        	newHeight = newWidth * image.getHeight() / image.getWidth();
+        	
+        } else {
+        	newHeight = getHeight();
+        	newWidth = newHeight / image.getWidth() / image.getHeight();
+        	
+        }
+        
+        //Sometimes they are coming out 0 for some reason...
+        if ( newHeight > 0 && newWidth > 0 ) {
+            //Resize the image
+            image = Bitmap.createScaledBitmap(image, (int)newWidth, (int)newHeight, true);
+            
+        }
         
         //Center it
         float left = ((float)this.getWidth()/2)-((float)image.getWidth()/2);
