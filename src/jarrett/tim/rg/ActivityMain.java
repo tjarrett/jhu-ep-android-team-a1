@@ -280,6 +280,7 @@ public class ActivityMain extends Activity implements Reporter,
 					int pos, long id) {
 				if (pos != 0) {
 					String text = parent.getItemAtPosition(pos).toString();
+					text = text.replace(" ", "");
 
 					// Start building our event
 					String event = currentPosition + "|" + text;
