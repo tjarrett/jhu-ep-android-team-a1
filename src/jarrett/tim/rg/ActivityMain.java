@@ -18,6 +18,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -104,6 +106,25 @@ public class ActivityMain extends Activity implements Reporter,
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		
+		//If we are in the emulator, just assume we have a connection... but if we are on a 
+		//device we want to make sure WiFi is enabled... so if we aren't in the emulator...
+		//    code from http://stackoverflow.com/questions/2799097/how-can-i-detect-when-an-android-application-is-running-in-the-emulator
+		Log.d("Tim", Build.PRODUCT);
+		if ( !"sdk".equals(Build.PRODUCT) && !"google_sdk".equals(Build.PRODUCT) ) {
+			
+			//Check if wifi is on...
+			//	http://www.tutorialforandroid.com/2009/10/turn-off-turn-on-wifi-in-android-using.html
+			WifiManager wifiManager = (WifiManager)ActivityMain.this.getSystemService(Context.WIFI_SERVICE);
+			if ( !wifiManager.isWifiEnabled() ) {
+				wifiManager.setWifiEnabled(true);
+				
+			} 
+			
+		} else {
+			currentPosition = "0,1";
+			
+		}
 
 		// As per Prof. Stanchfield...
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -119,18 +140,35 @@ public class ActivityMain extends Activity implements Reporter,
 			 */
 			@Override
 			public void onClick(View arg0) {
+				//Close it if it's already open
+				if ( socketHandler != null ) {
+					socketHandler.close();
+					socketHandler = null;
+					
+				}
+				
 				// Connect to socket server via ip address defined in ip address
 				// textview
 				Socket socket = null;
 				try {
+					Log.d("Tim", "Opening the connection");
 					socket = new Socket(ipAddress.getText().toString(), 4242);
 					socketHandler = new GadgetSocketHandler(ActivityMain.this,
 							socket);
 					socketHandler.start();
+					
 				} catch (UnknownHostException e) {
+					RgTools.createNotification(getApplicationContext(), "Network Error", e.getMessage(), android.R.drawable.ic_delete);
 					e.printStackTrace();
+					
 				} catch (IOException e) {
+					RgTools.createNotification(getApplicationContext(), "Network Error", e.getMessage(), android.R.drawable.ic_delete);
 					e.printStackTrace();
+					
+				} catch ( Exception e ) {
+					RgTools.createNotification(getApplicationContext(), "Network Error", e.getMessage(), android.R.drawable.ic_delete);
+					e.printStackTrace();
+					
 				}
 
 			}
