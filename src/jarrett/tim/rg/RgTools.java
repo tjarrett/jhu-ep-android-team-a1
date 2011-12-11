@@ -6,16 +6,33 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+/**
+ * Utility class for dealing with switching modes, comments etc
+ */
 public class RgTools {
-	
+	/**
+	 * Debug constant for android debugging
+	 */
 	public static final String DEBUG = "Group-A1-DEBUG";
 	
+	/**
+	 * Server constant for android debugging
+	 */
     public static final String SERVER = "Group-A1-Server";
 
+	/**
+	 * Client constant for android debugging
+	 */
 	public static final String CLIENT = "Group-A1-Client";
 
+	/**
+	 * Bluetooth constant for android debugging
+	 */
 	public static final String BLUETOOTH_SERVER = "Group-A1-Bluetooth-Server";
 	
+	/**
+	 * QR code constant for android debugging
+	 */
 	public static final String QR_SCANNER = "Group-A1-QR-Scanner";
 
 	
@@ -27,6 +44,13 @@ public class RgTools {
 	 */
 	public static final boolean wifiMode = true;
 	
+	/**
+	 * Create a notification and show it
+	 * @param context
+	 * @param ntf_title
+	 * @param ntf_text
+	 * @param icon
+	 */
 	public static void createNotification(Context context, String ntf_title, String ntf_text, int icon) {
 		String ns = Context.NOTIFICATION_SERVICE;
 		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(ns);

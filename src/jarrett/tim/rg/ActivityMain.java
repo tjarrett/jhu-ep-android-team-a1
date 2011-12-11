@@ -108,9 +108,7 @@ public class ActivityMain extends Activity implements Reporter,
 		//If we are in the emulator, just assume we have a connection... but if we are on a 
 		//device we want to make sure WiFi is enabled... so if we aren't in the emulator...
 		//    code from http://stackoverflow.com/questions/2799097/how-can-i-detect-when-an-android-application-is-running-in-the-emulator
-		Log.d("Tim", Build.PRODUCT);
 		if ( !"sdk".equals(Build.PRODUCT) && !"google_sdk".equals(Build.PRODUCT) ) {
-			
 			//Check if wifi is on...
 			//	http://www.tutorialforandroid.com/2009/10/turn-off-turn-on-wifi-in-android-using.html
 			WifiManager wifiManager = (WifiManager)ActivityMain.this.getSystemService(Context.WIFI_SERVICE);
@@ -149,7 +147,6 @@ public class ActivityMain extends Activity implements Reporter,
 				// textview
 				Socket socket = null;
 				try {
-					Log.d("Tim", "Opening the connection");
 					socket = new Socket(ipAddress.getText().toString(), 4242);
 					socketHandler = new GadgetSocketHandler(ActivityMain.this,
 							socket);
@@ -629,7 +626,7 @@ public class ActivityMain extends Activity implements Reporter,
 	}
 
 	/**
-	 * 
+	 * Report when something comes in
 	 * @param message
 	 * @param t
 	 */
@@ -639,7 +636,7 @@ public class ActivityMain extends Activity implements Reporter,
 	}
 
 	/**
-	 * 
+	 * Report when something comes in
 	 * @param line
 	 */
 	@Override
