@@ -447,22 +447,25 @@ abstract public class ThingView extends ImageView
         int imageResource = context.getResources().getIdentifier(imageName, "drawable", getClass().getPackage().getName());
         
         //Get our bitmap
-        Bitmap image = BitmapFactory.decodeResource(getResources(), imageResource);      	
+        Bitmap image = BitmapFactory.decodeResource(getResources(), imageResource);  
         
         //Get the aspect ratio
         float newWidth = 0;
         float newHeight = 0;
         
+        //We aren't always working with a square box... So always use the smallest side for upsizing our image
+        int smallestSide = ( getWidth() <= getHeight() ) ? getWidth() : getHeight();
+        
         //Figure out the widest size
         if ( image.getWidth() >= image.getHeight() ) {
-        	newWidth = getWidth();
+        	newWidth = smallestSide;
         	newHeight = newWidth * image.getHeight() / image.getWidth();
         	
         } else {
-        	newHeight = getHeight();
-        	newWidth = newHeight / image.getWidth() / image.getHeight();
+        	newHeight = smallestSide;
+        	newWidth = newHeight * image.getWidth() / image.getHeight();
         	
-        }
+        }   	
         
         //Sometimes they are coming out 0 for some reason...
         if ( newHeight > 0 && newWidth > 0 ) {
