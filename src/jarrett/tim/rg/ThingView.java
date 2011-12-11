@@ -447,9 +447,7 @@ abstract public class ThingView extends ImageView
         int imageResource = context.getResources().getIdentifier(imageName, "drawable", getClass().getPackage().getName());
         
         //Get our bitmap
-        Bitmap image = BitmapFactory.decodeResource(getResources(), imageResource);  
-        Log.d(RgTools.DEBUG, "origWidth: " + image.getWidth());
-    	Log.d(RgTools.DEBUG, "origHeight: " + image.getHeight());    	
+        Bitmap image = BitmapFactory.decodeResource(getResources(), imageResource);      	
         
         //Get the aspect ratio
         float newWidth = 0;
