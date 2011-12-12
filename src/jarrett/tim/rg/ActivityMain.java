@@ -116,7 +116,7 @@ public class ActivityMain extends Activity implements Reporter,
 				wifiManager.setWifiEnabled(true);
 				
 			} 
-			
+		// default position if no scan	
 		} else {
 			currentPosition = "0,1";
 			
@@ -217,15 +217,6 @@ public class ActivityMain extends Activity implements Reporter,
 										String finalMsg = currentPosition + "|"
 												+ msg;
 
-										// Mangle this message so the other
-										// server knows it's a response and not
-										// a command...
-										// This Rube Goldberg Protocol needs
-										// some work...
-
-										// todo: remove the next line...
-										// finalMsg = finalMsg + "[";
-
 										Log.d(RgTools.SERVER,
 												"Thing fired off this: "
 														+ finalMsg);
@@ -311,8 +302,6 @@ public class ActivityMain extends Activity implements Reporter,
 						applyEventToCurrentThing(event);
 
 					} else {
-						// Send out the event -- maybe even over bluetooth
-
 						// If it's ElectricOn, send both Up and Right
 						if ("ElectricOn".equals(text)) {
 							sendEvent(currentPosition, text, Direction.UP);
@@ -584,7 +573,7 @@ public class ActivityMain extends Activity implements Reporter,
 	 * @param eventCarrier
 	 */
 	public void sendToHandler(EventCarrier eventCarrier) {
-		// We programmer ThingView to take string formatted as:
+		// We programm ThingView to take string formatted as:
 		// 0,1|Heat|UP (for example)
 		// Might refactor in future, but for now just make the message the way
 		// we like
