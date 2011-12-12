@@ -220,8 +220,15 @@ public class ActivityMain extends Activity implements Reporter,
 										Log.d(RgTools.SERVER,
 												"Thing fired off this: "
 														+ finalMsg);
-
-										sendEvent(finalMsg);
+										
+										//If we don't have a position yet, then sendEvent is going to apply 
+										//this event to the local thing... so rather than let that happen (because 
+										//it can create an infinite loop) cut it short here... Unless we have a position... 
+										//then it should get sent out over the wire
+										if ( RgTools.wifiMode && socketHandler != null && !"unknown".equals(currentPosition) ) {
+											sendEvent(finalMsg);
+											
+										}
 
 									}// end for
 
@@ -508,7 +515,7 @@ public class ActivityMain extends Activity implements Reporter,
 			}
 		} else {
 			applyEventToCurrentThing(location + "|" + eventString + "|"
-					+ Direction.NULL);
+					+ direction.toString());
 		}
 
 	}// end sendEvent
