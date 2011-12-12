@@ -271,11 +271,14 @@ public class ActivityMain extends Activity implements Reporter,
 					// Start building our event
 					String event = currentPosition + "|" + text;
 
-					// Default direction is ALL which is what the homework says
-					// to do... but
-					// I think this is going to be a problem since we are now
-					// supposed to send
-					// Right, Left, Up, Down, etc
+					//The homework instructions at some point send to have all buttons send the direction as "all"
+					//
+					//My understanding is that Wires and Ropes can only accept certain events from certain directions.
+					//For example a rope that goes from Left to Right can only accept Pull if it comes in from the 
+					//left or the right -- Pull ALL doesn't make sense and would be ambigious.
+					//
+					//To that end, we are deviating from the assignment instruction for TESTING PURPOSES. The buttons 
+					//(now spinner) will send a direction besides ALL for ElectricOn, ElectricOff, Pull, and Release
 					String direction = "ALL";
 					Direction directionObject = Direction.ALL;
 

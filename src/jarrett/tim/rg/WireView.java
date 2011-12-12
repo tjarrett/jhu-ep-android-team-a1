@@ -51,7 +51,7 @@ public abstract class WireView extends ThingView
     }//end WireView Constructor
     
     /**
-     * 
+     * Receive an incomine event to the wire
      */
 	@Override
 	public void receiveEvent(String event) 

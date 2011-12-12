@@ -52,7 +52,7 @@ public abstract class RopeView extends ThingView
     }//end RopeView constructor   
     
     /**
-     * 
+     * Receive an incoming event to the rope view
      */
 	@Override
 	public void receiveEvent(String event) 
