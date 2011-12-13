@@ -400,7 +400,10 @@ public class ActivityMain extends Activity implements Reporter,
 	@Override
 	protected void onDestroy() {
 		// unregister any of our broadcast receivers
-		socketHandler.close();
+		if ( socketHandler != null ) {
+			socketHandler.close();
+		}
+		
 		super.onDestroy();
 
 	}// end onDestroy
